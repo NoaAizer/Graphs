@@ -1,6 +1,6 @@
 package dataStructure;
 
-public class Edges implements edge_data{
+public class Edge implements edge_data{
 
 	private int src;
 	private int dest;
@@ -9,7 +9,7 @@ public class Edges implements edge_data{
 	private int tag;
 
 
-	public Edges(int src, int dest, double weight, String info, int tag) {
+	public Edge(int src, int dest, double weight, String info, int tag) {
 		this.src = src;
 		this.dest = dest;
 		this.weight = weight;
@@ -17,7 +17,7 @@ public class Edges implements edge_data{
 		this.tag = tag;
 	}
 
-	public Edges(edge_data ed) {
+	public Edge(edge_data ed) {
 		this.src=ed.getSrc();
 		this.dest=ed.getDest();
 		this.weight=ed.getWeight();

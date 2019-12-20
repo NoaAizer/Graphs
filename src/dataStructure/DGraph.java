@@ -1,103 +1,130 @@
 package dataStructure;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
 
 public class DGraph implements graph{
 
 	int mc;
-	HashMap<Integer,node_data> idToNode;
-	HashMap<ArrayList<Integer>,edge_data> nodesToEdge;
-	HashMap<Integer,ArrayList<edge_data>> idToEdges;
+	int edgesCounter;
+	HashMap<Integer,node_data> nodes;
+	HashMap<Integer,HashMap<Integer,edge_data>> edges;
 
-
-	public DGraph(int mc, HashMap<Integer, node_data> idToNode, HashMap<ArrayList<Integer>, edge_data> nodesToEdge,
-			HashMap<Integer, ArrayList<edge_data>> idToEdges) {
-		this.mc = mc;
-		this.idToNode = idToNode;
-		this.nodesToEdge = nodesToEdge;
-		this.idToEdges = idToEdges;
-	}
-	
 	public DGraph() {
 		this.mc = 0;
-		this.idToNode = new HashMap <Integer,node_data>();
-		this.nodesToEdge = new HashMap<ArrayList<Integer>,edge_data>();
-		this.idToEdges = new HashMap<Integer,ArrayList<edge_data>>();
+		this.edgesCounter = 0;
+		this.nodes = new HashMap<Integer,node_data>();
+		this.edges = new HashMap<Integer,HashMap<Integer,edge_data>>();
 	}
-	
+
+	public DGraph(DGraph g) {
+		this.mc = g.getMC();
+		this.edgesCounter = g.edgeSize();
+		this.nodes=(HashMap<Integer, node_data>) g.getNodes();
+		this.edges = (HashMap<Integer,HashMap<Integer,edge_data>>) g.getEdges();
+	}
+
+	public HashMap<Integer, node_data> getNodes() {
+		return this.nodes;
+	}
+
+	public HashMap<Integer, HashMap<Integer, edge_data>> getEdges() {
+		return this.edges;
+	}
+
 	@Override
 	public node_data getNode(int key) {
-		if(idToNode.get(key)==null) return null;
-		return idToNode.get(key);
+		if(nodes.containsKey(key))
+			return nodes.get(key);
+		else
+			return null;
 	}
-	private ArrayList<Integer> buildArrayList(int src, int dest) {
-		ArrayList<Integer> nodes= new ArrayList<Integer>();
-		nodes.add(src);
-		nodes.add(dest);
-		return nodes;
-	}
+
 	@Override
 	public edge_data getEdge(int src, int dest) {
-		edge_data ed=nodesToEdge.get(buildArrayList(src, dest));
-		if(ed==null)return null;
-		return ed;
+		if(edges.containsKey(src)&&edges.get(src).containsKey(dest))
+			return edges.get(src).get(dest);
+		else
+			return null;
 	}
 
 	@Override
 	public void addNode(node_data n) {
-		idToNode.put(n.getKey(),n);
-		idToEdges.put(n.getKey(), new ArrayList<edge_data>());
+		nodes.put(n.getKey(),n);
 		mc++;
 	}
 
 	@Override
 	public void connect(int src, int dest, double w) {
-		Edges e = new Edges(src, dest, w,null,0);//??????check????????
-		nodesToEdge.put(buildArrayList(src, dest), e);
-		idToEdges.get(src).add(e);
-		idToEdges.get(dest).add(e);
-
+		Edge e = new Edge(src, dest, w,null,0);//??????check????????
+		if(nodes.containsKey(src)&&nodes.containsKey(dest))// the nodes are exist in the graph
+		{
+			if(!edges.containsKey(src)) {//if the src node is already exist
+				HashMap<Integer,edge_data> newEdge= new HashMap<Integer,edge_data>();//empty hashmap
+				edges.put(src, newEdge);
+			}
+			edges.get(src).put(dest,e);
+			mc++;
+			edgesCounter++;
+		}
 
 	}
 	@Override
 	public Collection<node_data> getV() {
-		return idToNode.values();
+		return nodes.values();
 		//return new ArrayList<node_data>(idToNode.values());
 	}
 
 	@Override
 	public Collection<edge_data> getE(int node_id) {
-		return nodesToEdge.values();
+		if(edges.containsKey(node_id))// the node is exist
+			return this.edges.get(node_id).values();
+		return null;
 	}
 
 	@Override
 	public node_data removeNode(int key) {///////////////////////////to do//////////////////////////////////////////
-		node_data nd=idToNode.remove(key);
-		idToEdges.remove(key);
-		mc++;
-		return nd;
+		if(nodes.containsKey(key)) {// the node is exist
+			if(nodes.containsKey(key))// if there is an edge with this node as a src
+				for (Integer node : nodes.keySet())// runs on all the nodes
+				{
+					if(node!=key&& edges.containsKey(node)&&edges.get(node).containsKey(key)) {// the key is the dest node
+						edges.get(node).remove(key);
+						edgesCounter--;
+						mc++;
+					}
+					if(node==key&&edges.containsKey(key)) {// the key is the src node
+						mc+=edges.get(key).size();// how many edges has been removed
+						edgesCounter-=edges.get(key).size();
+						edges.remove(key);
+					}
+
+				}
+			mc++;
+			node_data removed=nodes.remove(key);// remove from the node hashmap.
+			return removed;
+		}
+		return null;
 	}
 
 	@Override
 	public edge_data removeEdge(int src, int dest) {
-		edge_data ed=nodesToEdge.remove(buildArrayList(src, dest));
-		idToEdges.get(src).remove(ed);
-		idToEdges.get(dest).remove(ed);
-		mc++;
-		return ed;
+		if(edges.containsKey(src)&&edges.get(src).containsKey(dest)) {// the edge is exist
+			mc++;
+			edgesCounter--;
+			return edges.get(src).remove(dest);
+		}
+		return null;
 	}
 
 	@Override
 	public int nodeSize() {
-		return idToNode.size();
+		return nodes.size();
 	}
 
 	@Override
 	public int edgeSize() {
-		return nodesToEdge.size();
+		return edgesCounter;
 	}
 
 	@Override
