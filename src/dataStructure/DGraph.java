@@ -72,7 +72,6 @@ public class DGraph implements graph{
 	@Override
 	public Collection<node_data> getV() {
 		return nodes.values();
-		//return new ArrayList<node_data>(idToNode.values());
 	}
 
 	@Override
@@ -83,7 +82,7 @@ public class DGraph implements graph{
 	}
 
 	@Override
-	public node_data removeNode(int key) {///////////////////////////to do//////////////////////////////////////////
+	public node_data removeNode(int key) {
 		if(nodes.containsKey(key)) {// the node is exist
 			if(nodes.containsKey(key))// if there is an edge with this node as a src
 				for (Integer node : nodes.keySet())// runs on all the nodes
@@ -94,8 +93,9 @@ public class DGraph implements graph{
 						mc++;
 					}
 					if(node==key&&edges.containsKey(key)) {// the key is the src node
-						mc+=edges.get(key).size();// how many edges has been removed
-						edgesCounter-=edges.get(key).size();
+						int numOfEdges=edges.get(key).size();// how many edges has been removed
+						mc+=numOfEdges;
+						edgesCounter-=numOfEdges;
 						edges.remove(key);
 					}
 
