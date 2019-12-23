@@ -56,7 +56,7 @@ public class DGraph implements graph{
 
 	@Override
 	public void connect(int src, int dest, double w) {
-		Edge e = new Edge(src, dest, w,null,0);//??????check????????
+		Edge e = new Edge(src, dest, w,"",0);
 		if(nodes.containsKey(src)&&nodes.containsKey(dest))// the nodes are exist in the graph
 		{
 			if(!edges.containsKey(src)) {//if the src node is already exist

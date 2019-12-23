@@ -17,7 +17,14 @@ public class Node implements node_data {
 		this.info = info;
 		this.tag = tag;
 	}
+public Node(int key,Point3D location) {
+	this.key=key;
+	this.location=location;
+	this.weight=Double.POSITIVE_INFINITY;
+	this.info=null;
+	this.tag=0;
 
+}
 	@Override
 	public int getKey() {
 		return key;
