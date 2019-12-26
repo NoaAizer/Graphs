@@ -714,7 +714,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 	// create the menu bar (changed to private)
 	@SuppressWarnings("deprecation")
-	private static JMenuBar createMenuBar() {
+	static JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menu = new JMenu("File");
 		menuBar.add(menu);

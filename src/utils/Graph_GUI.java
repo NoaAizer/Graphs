@@ -13,29 +13,50 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.Collection;
 import java.util.LinkedList;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileSystemView;
 
+import algorithms.Graph_Algo;
+import algorithms.graph_algorithms;
+import dataStructure.DGraph;
+import dataStructure.Node;
+import dataStructure.edge_data;
+import dataStructure.graph;
 import dataStructure.node_data;
 
 
-public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
+public class Graph_GUI extends JFrame implements ActionListener, MouseListener, KeyListener{
 
-	LinkedList<Point3D> points = new LinkedList<Point3D>();
-
+	graph g_GUI ;
+	
 	public Graph_GUI() {
-//		Dimension d= new Dimension(900,900);
-//		this.setSize(d);
 		
-		this.setBounds(100, 200, 900, 900);
+		initGUI();
+	}
+	
+	public Graph_GUI(graph g){
+		
+		this.g_GUI = g;
+		initGUI();
+;
+	}
+	
+	public void initGUI(){
+		
+		this.setBounds(100, 200, 1000, 1000);
 		this.setLayout(new FlowLayout()); // simtri
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -46,73 +67,56 @@ public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
 		Menu file = new Menu("File");
 		menuBar.add(file);
 		MenuItem item1f = new MenuItem("Save_Image");
-		MenuItem item2f = new MenuItem("Load_Graph");
-		MenuItem item3f = new MenuItem("Sava Graph_file");
 		file.add(item1f);
-		file.add(item2f);
-		file.add(item3f);		      
+		
+		//KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK);
+		//KeyStroke.getKeyStroke('a',java.awt.event.InputEvent.CTRL_MASK);
 		item1f.addActionListener(this);
+		MenuItem item2f = new MenuItem("Load_Graph");
+		file.add(item2f);
 		item2f.addActionListener(this);
+		MenuItem item3f = new MenuItem("Sava Graph_file");
+		file.add(item3f);		      
 		item3f.addActionListener(this);
 		
 
 		Menu algo = new Menu("Algo");
 		menuBar.add(algo);
 		MenuItem item1a = new MenuItem("Is_Connected");
-		MenuItem item2a = new MenuItem("shortestPathDist");
-		MenuItem item3a = new MenuItem("TSP");
 		algo.add(item1a);
-		algo.add(item2a);
-		algo.add(item3a);
 		item1a.addActionListener(this);
+		MenuItem item2a = new MenuItem("shortestPathDist");
+		algo.add(item2a);
 		item2a.addActionListener(this);
+		MenuItem item3a = new MenuItem("TSP");
+		algo.add(item3a);
 		item3a.addActionListener(this);
-		this.addMouseListener(this);
 		
-//		JMenuBar menuBar = new JMenuBar();
-//		JMenu menu = new JMenu("File");
-//		menuBar.add(menu);
-//		JMenuItem menuItem1 = new JMenuItem(" Save...   ");
-//		menuItem1.addActionListener(this);
-//		menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-//				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-//		menu.add(menuItem1);
+		this.addMouseListener(this);
+
 	}
 	
 		public void paint(Graphics g) {
 			super.paint(g);
-			Point3D prev = null;
-			for (Point3D p : points) {
+			Collection<node_data> n = g_GUI.getV();
+			for (node_data node : n) {
+				Point3D src = node.getLocation();
 				g.setColor(Color.BLUE);
-				g.fillOval((int)p.x(), (int)p.y(), 10, 10);
-
-				if(prev != null) { //draw between points
+				g.fillOval(src.ix(), src.iy(), 10, 10);
+				g.drawString(""+node.getKey(), (src.ix()+1), (src.iy()+1));
+				Collection<edge_data> e = g_GUI.getE(node.getKey());
+				for (edge_data edge : e) {
 					g.setColor(Color.RED);
-					g.drawLine((int)p.x(), (int)p.y(), (int)prev.x(), (int)prev.y());
-					///str=w //location print
-					g.drawString("5", (int)((p.x()+prev.x())/2), (int)((p.y()+prev.y())/2)); 
-					//g.drawString(, (int)((p.x()+prev.x())/2), (int)((p.y()+prev.y())/2));
+					Point3D dest = g_GUI.getNode(edge.getDest()).getLocation();
+					g.drawLine(src.ix() , src.iy() , dest.ix() , dest.iy());
+					g.drawString(""+edge.getWeight(), (int)((src.x()+dest.x())/2), (int)((src.y()+dest.y())/2));
+					g.setColor(Color.YELLOW);
+					g.fillOval((src.ix()+10), (src.iy()+10), 10, 10);
 				}
-				prev = p;
 			}
+			
 		}
-		
-		private Range rangeX (LinkedList<Point3D> points) {
-			double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
-			for (Point3D p : points) {
-				if(p.x()<min) min=p.x();
-				else if(p.x()>max) max=p.x();
-			}
-			return new Range (min+10,max+10);
-		}
-		private Range rangeY (LinkedList<Point3D> points) {
-			double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
-			for (Point3D p : points) {
-				if(p.y()<min) min=p.y();
-				else if(p.y()>max) max=p.y();
-			}
-			return new Range (min+10,max+10);
-		}
+	
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -131,7 +135,42 @@ public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
 //				String filename = chooser.getFile();
 //				System.out.println(filename);
 //			}
+			if(str.startsWith("Save_Image")) {
+				graph_algorithms ga = new Graph_Algo();
+				ga.init(this.g_GUI);
+				JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+				if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+					try {
+						ga.save(fileChooser.getSelectedFile() + ".txt");
+					} catch (Exception ee) {
+						ee.getMessage();
+					}
+				}
+			}
+			if(str.startsWith("Load")) {
+				graph_algorithms ga = new Graph_Algo();
+				ga.init(this.g_GUI);
+				JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+				if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					try {
+						File file = fileChooser.getSelectedFile();
+					//	ga.init(null);           //////////write - SelectedFile.getAbsolutePath()//////////
+						this.g_GUI = ga.copy();
+					} catch (Exception ee) {
+						ee.getMessage();
+					}
+				}
+			}
 			if(str.startsWith("Is_Connected")) {
+				graph_algorithms ga = new Graph_Algo();
+				ga.init(this.g_GUI);
+				boolean result = ga.isConnected();
+				if(result) {
+					JOptionPane.showMessageDialog(null, "it's connected");
+				}else {
+					JOptionPane.showMessageDialog(null, "it's not connected");
+				}
+				
 //				Point3D	p1=new Point3D(-1,-1,1);
 //				Point3D	p2=new Point3D(-1,1,4);
 //				Point3D	p3=new Point3D(0,0,0);
@@ -139,31 +178,28 @@ public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
 //				Point3D	p5=new Point3D(-1,1,-1);
 //				Point3D	p6=new Point3D(10,5,1);
 //				Point3D	p7=new Point3D(9,0,1);
-				Point3D p1 = new Point3D(-100,100);
-				Point3D p2 = new Point3D(50,300);
-				Point3D p3 = new Point3D(400,150);
-				points.add(p1);
-				points.add(p2);
-				points.add(p3);
+			
+//				points.add(p1);
+//				points.add(p2);
+//				points.add(p3);
 //				points.add(p4);
 //				points.add(p5);
 //				points.add(p6);
 //				points.add(p7);
 				repaint();
 			}else if(str.equals("shortestPathDist")) {
-				Range rx= rangeX(points);
-				Range ry= rangeY(points);
-				Point3D p1 = new Point3D(rx.get_min(),rx.get_max());
-				Point3D p2 = new Point3D(rx.get_min(),rx.get_max());
-				points.add(p1);
-				points.add(p2);
-				StdDraw.setXscale(rx.get_min(), rx.get_max());
-				StdDraw.setXscale(ry.get_min(), ry.get_max());
-				
+				graph_algorithms ga = new Graph_Algo();
+				ga.init(this.g_GUI);
+				String src = JOptionPane.showInputDialog("Please input a src point");
+				String dest = JOptionPane.showInputDialog("Please input a dest point");
+				double result = ga.shortestPathDist(Integer.parseInt(src), Integer.parseInt(dest));
+				if(result > 0){
+					JOptionPane.showMessageDialog(null, "The shortest path dist is:",""+result,JOptionPane.INFORMATION_MESSAGE);
+				}else {
+					JOptionPane.showMessageDialog(null,  "The point's is'nt exist","null",JOptionPane.INFORMATION_MESSAGE);
+				}
 			}else if(str.equals("TSP")){
-				Point3D p3 = new Point3D(400,150);
-				points.add(p3);
-				repaint();
+
 
 			}
 			
@@ -190,11 +226,11 @@ public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		double x = e.getX();
-		double y = e.getY();
-		Point3D p = new Point3D(x,y);
-		points.add(p);
-		repaint();		
+//		double x = e.getX();
+//		double y = e.getY();                  ////I draw
+//		Point3D p = new Point3D(x,y);
+//		points.add(p);
+//		repaint();		
 	}
 
 	@Override
@@ -204,8 +240,53 @@ public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
 	}
 	
 	public static void main(String[] args) {
+		graph g=new DGraph();
+//		Point3D p1 = new Point3D(-100,100);
+//		Point3D p2 = new Point3D(50,300);
+//		Point3D p3 = new Point3D(400,150);
+//	node_data	n1=new Node(1,p1,0,null,0);
+//	node_data n2=new Node(2,p2,0,null,0);
+//	node_data	n3=new Node(3,p3,0,null,0);
+//		
+//		g.addNode(n1);
+//		g.addNode(n2);
+//		g.addNode(n3);
+		int j=2;
+		for (int i=100;i<1000;i=i+50,j=j+50)
+		{
+			Point3D Location = new Point3D(i,j);
+			node_data node=new Node(i,Location);
+			g.addNode(node);
+		}
+		Collection<node_data> s = g.getV();
+		for (node_data node1 : s) 
+		{
+			for (node_data node2 : s) 
+			{
+				if(node1.getKey()!=node2.getKey())
+					g.connect(node1.getKey(), node2.getKey(), Double.MAX_VALUE);
+			}
+		}
 		Graph_GUI app = new Graph_GUI();
 		app.setVisible(true);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

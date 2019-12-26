@@ -5,14 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import dataStructure.edge_data;
-import dataStructure.graph;
-import dataStructure.node_data;
+import dataStructure.*;
+
 /**
  * This empty class represents the set of graph-theory algorithms
  * which should be implemented as part of Ex2 - Do edit this class.
@@ -80,9 +80,74 @@ public class Graph_Algo implements graph_algorithms{
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return false;
+		boolean result=runDFS(g);
+		if(!result) return false;//DFS traversal doesn't visit all nodes.
+		graph tran_g=getTranspose();//Create a reversed graph 
+		result=runDFS(tran_g);//Do DFS for reversed graph starting from the same node as before.
+		return result;
 	}
+	/**
+	 * Runs DFS algorithm on the given graph.
+	 * @param g represents the graph to be traveled.
+	 * @return true- if all nodes are connected , otherwise false.
+	 */
+	private boolean runDFS(graph g) {
+		boolean flag_first=true;
+		//Marks all the nodes as not visited 
+		for(Iterator<node_data> it=g.getV().iterator();it.hasNext();) {
+			it.next().setTag(0);
+		}
+		//Do DFS traversal starting from first node. 
+		for(Iterator<node_data> it=g.getV().iterator();it.hasNext()&&flag_first;) {
+			node_data v=it.next();
+			flag_first=false;
+			DFSUtil(v.getKey());
+		}
+		// If DFS traversal doesn't visit all nodes, then return false.
+		for(Iterator<node_data> it=g.getV().iterator();it.hasNext();) {
+			node_data v=it.next();
+			if(g.getNode(v.getKey()).getTag()==0)
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Runs DFS starting from the first node.
+	 * @param key represents the first node.
+	 */
+	private void DFSUtil(int key) 
+	{ 
+		// Mark the current node as visited
+		g.getNode(key).setTag(1); 
+
+		// Recur for all the nodes adjacent to this node
+		for(Iterator<edge_data> edgeIt=g.getE(key).iterator();edgeIt.hasNext();)
+		{
+			edge_data e=edgeIt.next();
+			node_data e_dest=g.getNode(e.getDest());
+			if(e_dest.getTag()==0)
+				DFSUtil(e_dest.getKey());	
+		}
+	}
+	/**
+	 * Transposes the original graph.
+	 * @return transpose of this graph 
+	 */
+	private graph getTranspose() 
+	{ 
+		graph tran_g = new DGraph(); 
+
+		for(Iterator<node_data> it=g.getV().iterator();it.hasNext();) {
+			node_data v=it.next();
+			for(Iterator<edge_data> edgeIt=g.getE(v.getKey()).iterator();edgeIt.hasNext();) {
+				edge_data e=edgeIt.next();
+				node_data e_dest=g.getNode(e.getDest());
+				tran_g.connect(e_dest.getKey(), v.getKey(), e.getWeight());
+			}
+		}
+		return tran_g; 
+	} 
 
 	@Override
 	public double shortestPathDist(int src, int dest) {
