@@ -9,23 +9,35 @@ In this project we have a  4 package:
 
 • algorithms:
       We implemented the graph_algorihms interface in Graph_Algo:
-      Read and save files.
-      Checking whether the graph is related.
-      The shortest distance, the function receives 2 vertices and calculates the shortest distance between them.
-      Copy - Deep copy of the graph.
-      TSP - Calculates the route through all vertices in the graph.
+     
+     Read and save files.
+     
+     Checking whether the graph is related.
+     
+     The shortest distance, the function receives 2 vertices and calculates the shortest distance between them.
+     
+     Copy - Deep copy of the graph.
+     
+     TSP - Calculates the route through all vertices in the graph.
       
  • DataStructure:
     We implemented the vertex and edge by the data structure – the HashMap.
     We implemented the graph interface in Dgraph:
+    
     There are functions to add and remove vertex and edge,  get and set to vertex, edge and weight.
+    
     Connect an edge with weight w between node src to node dest.
+    
     MC - Counts the number of actions done on the graph.
       
- • Gui:  ******
+ • Gui:
+ ******
  • utils:
-      Tools to use and create the GUI (Point3D, Range, stdDraw).
- • Junit: *******
+ 
+ Tools to use and create the GUI (Point3D, Range, stdDraw).
+ 
+ • Junit: 
+ *******
 
 
 
