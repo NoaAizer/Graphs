@@ -1,9 +1,11 @@
 package dataStructure;
 
+
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class DGraph implements graph{
+public class DGraph implements graph, Serializable{
 
 	int mc;
 	int edgesCounter;
@@ -50,15 +52,21 @@ public class DGraph implements graph{
 
 	@Override
 	public void addNode(node_data n) {
-		nodes.put(n.getKey(),n);
-		mc++;
+			if(!nodes.containsValue(n)) {
+			nodes.put(n.getKey(),n);
+			mc++;
+		}
 	}
 
 	@Override
 	public void connect(int src, int dest, double w) {
-		Edge e = new Edge(src, dest, w,"",0);
-		if(nodes.containsKey(src)&&nodes.containsKey(dest))// the nodes are exist in the graph
-		{
+		try {
+			if(w<=0)
+				throw new RuntimeException("ERR: The weight should be larger than 0");
+			if(src==dest)
+				throw new RuntimeException("ERR: The nodes should be different");
+			if(nodes.containsKey(src)&&nodes.containsKey(dest)) {	
+			Edge e = new Edge(src, dest, w,"",0);	
 			if(!edges.containsKey(src)) {//if the src node is already exist
 				HashMap<Integer,edge_data> newEdge= new HashMap<Integer,edge_data>();//empty hashmap
 				edges.put(src, newEdge);
@@ -66,8 +74,11 @@ public class DGraph implements graph{
 			edges.get(src).put(dest,e);
 			mc++;
 			edgesCounter++;
+			}
 		}
-
+		catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	@Override
 	public Collection<node_data> getV() {
@@ -131,5 +142,4 @@ public class DGraph implements graph{
 	public int getMC() {
 		return mc;
 	}
-
 }

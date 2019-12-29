@@ -1,6 +1,8 @@
 package dataStructure;
 
-public class Edge implements edge_data{
+import java.io.Serializable;
+
+public class Edge implements edge_data, Serializable{
 
 	private int src;
 	private int dest;
@@ -16,7 +18,13 @@ public class Edge implements edge_data{
 		this.info = info;
 		this.tag = tag;
 	}
-
+	public Edge(int src, int dest, double weight) {
+		this.src = src;
+		this.dest = dest;
+		this.weight = weight;
+		this.info = "";
+		this.tag = 0;
+	}
 	public Edge(edge_data ed) {
 		this.src=ed.getSrc();
 		this.dest=ed.getDest();
@@ -60,6 +68,19 @@ public class Edge implements edge_data{
 	@Override
 	public void setTag(int t) {
 		this.tag=t;
+	}
+	public boolean equals(Object edge)
+	{
+		if(edge instanceof Edge)
+		{
+			if(((Edge) edge).getSrc()==this.src &&((Edge) edge).getDest()==this.dest && 
+					((Edge) edge).getWeight()==this.weight && ((Edge) edge).getInfo()==this.info && 
+					((Edge) edge).getTag()==this.getTag())
+				return true;
+			return false;
+		}
+		else
+			return false;
 	}
 
 }
