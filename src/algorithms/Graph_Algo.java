@@ -1,5 +1,6 @@
 package algorithms;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,8 +9,9 @@ import java.io.ObjectOutputStream;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.Queue;
 
 import dataStructure.*;
 
@@ -22,60 +24,52 @@ import dataStructure.*;
 public class Graph_Algo implements graph_algorithms{
 	private graph g;
 
+	public Graph_Algo() {
+
+		this.g = new DGraph();
+	}
+
 	@Override
 	public void init(graph g) {
 		this.g=g;
 	}
 
 	@Override
-	public void init(String file_name) {
-		// TODO Auto-generated method stub
-		Graph_Algo g= new Graph_Algo();
+	public void init(String file_name) 
+	{
 		try
 		{    
 			FileInputStream file = new FileInputStream(file_name); 
 			ObjectInputStream in = new ObjectInputStream(file); 
-
-			g = (Graph_Algo) in.readObject(); 
-
+			g = (graph)in.readObject(); 
 			in.close(); 
 			file.close(); 
-
-			System.out.println(g);
 		} 
-
 		catch(IOException ex) 
 		{ 
 			System.out.println("IOException is caught"); 
 		} 
-
 		catch(ClassNotFoundException ex) 
 		{ 
 			System.out.println("ClassNotFoundException is caught"); 
 		} 
-
 	}
 
-
 	@Override
-	public void save(String file_name) {  
-		Graph_Algo g = new Graph_Algo();
+	public void save(String file_name) 
+	{
 		try
 		{    
 			FileOutputStream file = new FileOutputStream(file_name); 
 			ObjectOutputStream out = new ObjectOutputStream(file); 
-
 			out.writeObject(g); 
-
 			out.close(); 
 			file.close(); 
-
 		}   
 		catch(IOException ex) 
 		{ 
 			System.out.println("IOException is caught"); 
 		} 
-
 	}
 
 	@Override
@@ -151,46 +145,58 @@ public class Graph_Algo implements graph_algorithms{
 
 	@Override
 	public double shortestPathDist(int src, int dest) {
-		for(Iterator<node_data> it=g.getV().iterator();it.hasNext();) {
-			it.next().setWeight(Double.POSITIVE_INFINITY);
-			it.next().setInfo("");
-			it.next().setTag(0);
-		}
-		g.getNode(src).setWeight(0);
-		PriorityQueue<node_data> Q = new PriorityQueue<node_data>();
-		Q.add(g.getNode(src));
-		for(Iterator<node_data> it=g.getV().iterator();it.hasNext();)
-		{ 
-			node_data v=it.next();
-			if(v.getKey()!=src)
-				Q.add(v);
-		}
-		while(Q.size()!=0)
-		{
-			int u=findMinNode(Q);
-			g.getNode(u).setTag(1);
-			for(Iterator<edge_data> edgeIt=g.getE(u).iterator();edgeIt.hasNext();)
+		try {
+			for(Iterator<node_data> it=g.getV().iterator();it.hasNext();) {
+				node_data n=it.next();
+				n.setWeight(Double.POSITIVE_INFINITY);
+				n.setInfo("");
+				n.setTag(0);
+			}
+			g.getNode(src).setWeight(0);
+			Queue<node_data> Q = new LinkedList<node_data>();
+			Q.add(g.getNode(src));
+			for(Iterator<node_data> it=g.getV().iterator();it.hasNext();)
+			{ 
+				node_data v=it.next();
+				if(v.getKey()!=src)
+					Q.add(v);
+			}
+			while(Q.size()!=0)
 			{
-				edge_data e=edgeIt.next();
-				node_data e_dest=g.getNode(e.getDest());
-				if(e_dest.getTag()==0&&e_dest.getWeight()>g.getNode(u).getWeight()+e.getWeight())
+				int u=findMinNode(Q);
+				g.getNode(u).setTag(1);
+				for(Iterator<edge_data> edgeIt=g.getE(u).iterator();edgeIt.hasNext();)
 				{
-					e_dest.setWeight(g.getNode(u).getWeight()+e.getWeight());
-					e_dest.setInfo(""+u);
-				}
-			}	
+					edge_data e=edgeIt.next();
+					node_data e_dest=g.getNode(e.getDest());
+					if(e_dest.getTag()==0&&e_dest.getWeight()>g.getNode(u).getWeight()+e.getWeight())
+					{
+						e_dest.setWeight(g.getNode(u).getWeight()+e.getWeight());
+						e_dest.setInfo(""+u);
+					}
+				}	
+			}
+			for(Iterator<node_data> nodeIt=g.getV().iterator();nodeIt.hasNext();) {
+				nodeIt.next().setTag(0);
+			}
 		}
-		for(Iterator<node_data> nodeIt=g.getV().iterator();nodeIt.hasNext();) {
-			nodeIt.next().setTag(0);
+		catch(Exception e) {
+			System.out.println(e.getMessage());
 		}
 		return g.getNode(dest).getWeight();
+	}
+	public graph getG() {
+		return g;
+	}
+	public void setG(graph g) {
+		this.g = g;
 	}
 	/**
 	 * Finds the node with the minimum weight and removes it from the queue.
 	 * @param q represents the queue with the unvisited nodes.
 	 * @return the node with the minimum weight
 	 */
-	private int findMinNode(PriorityQueue<node_data> q) {
+	private int findMinNode(Queue<node_data> q) {
 		double weight=Double.POSITIVE_INFINITY;
 		int minNode=0;
 		node_data temp=null;
@@ -238,10 +244,16 @@ public class Graph_Algo implements graph_algorithms{
 
 	@Override
 	public graph copy() {
-		Graph_Algo g_copy=new Graph_Algo();
-		this.save("graph");
-		g_copy.init("graph");
-		return g_copy.g;
+		graph g_copy= new DGraph();
+		for (node_data n : g.getV()) {
+	g_copy.addNode(n);
+}
+	for (node_data n : g.getV()) {
+		g_copy.addNode(n);
+for (edge_data e : g.getE(n.getKey())) 
+	g_copy.connect(e.getSrc(),e.getDest(),e.getWeight());
+}
+		return g_copy;
 	}
 
 }
