@@ -1,5 +1,7 @@
 package utils;
 
+
+
 //package stdDraw;
 // https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java.html
 /******************************************************************************
@@ -26,6 +28,11 @@ package utils;
  *       images and strings
  *
  ******************************************************************************/
+
+
+import gui.Graph_GUI;
+import algorithms.Graph_Algo;
+import dataStructure.*;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -62,18 +69,25 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
 import javax.swing.KeyStroke;
+
+
 
 /**
  *  The {@code StdDraw} class provides a basic capability for
@@ -479,6 +493,8 @@ import javax.swing.KeyStroke;
  *  @author Kevin Wayne
  */
 public final class StdDraw implements ActionListener, MouseListener, MouseMotionListener, KeyListener {
+	public static Graph_Algo graph=new Graph_Algo();
+	public static Graph_GUI gui= new Graph_GUI();
 
 	/**
 	 *  The color black.
@@ -711,19 +727,46 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		frame.requestFocusInWindow();
 		frame.setVisible(true);
 	}
-
+	public static void initGraph (graph g){
+		StdDraw.graph.init(g);
+	}
 	// create the menu bar (changed to private)
+
 	@SuppressWarnings("deprecation")
-	static JMenuBar createMenuBar() {
+	private static JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("File");
-		menuBar.add(menu);
-		JMenuItem menuItem1 = new JMenuItem(" Save...   ");
-		menuItem1.addActionListener(std);
-		menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+		JMenu menu1 = new JMenu("File");
+		JMenu menu2 = new JMenu("Algo");
+		menuBar.add(menu1);
+		menuBar.add(menu2);
+		JMenuItem item1f = new JMenuItem("Save image");
+		JMenuItem item2f = new JMenuItem("Load Graph");
+		JMenuItem item3f = new JMenuItem("Save Graph_file");
+		item1f.addActionListener(std);
+		item2f.addActionListener(std);
+		item3f.addActionListener(std);
+		item1f.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		menu.add(menuItem1);
+		item2f.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+		menu1.add(item1f);
+		menu1.add(item2f);
+		menu1.add(item3f);
+		JMenuItem item1a = new JMenuItem("Is_Connected");
+		JMenuItem item2a = new JMenuItem("shortestPathDist");
+		JMenuItem item3a = new JMenuItem("shortestPath");
+		JMenuItem item4a = new JMenuItem("TSP");
+		item1a.addActionListener(std);
+		item2a.addActionListener(std);
+		item3a.addActionListener(std);
+		item4a.addActionListener(std);
+		menu2.add(item1a);
+		menu2.add(item2a);
+		menu2.add(item3a);
+		menu2.add(item4a);
+
 		return menuBar;
+
 	}
 
 
@@ -1601,7 +1644,12 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	/***************************************************************************
 	 *  Save drawing to a file.
 	 ***************************************************************************/
-
+	public static void load(String filename) {
+		System.out.println(filename);
+		if (filename == null) throw new IllegalArgumentException();
+		graph.init(filename);
+		gui.init(graph.getG());
+	}
 	/**
 	 * Saves the drawing to using the specified filename.
 	 * The supported image formats are JPEG and PNG;
@@ -1645,7 +1693,8 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		}
 
 		else {
-			System.out.println("Invalid image file type: " + suffix);
+			JOptionPane.showMessageDialog(null,"Invalid image file type: "+suffix,"", JOptionPane.INFORMATION_MESSAGE);
+			//System.out.println("Invalid image file type: " + suffix);
 		}
 	}
 
@@ -1654,14 +1703,103 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	 * This method cannot be called directly.
 	 */
 	@Override
+
 	public void actionPerformed(ActionEvent e) {
-		FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
-		chooser.setVisible(true);
-		String filename = chooser.getFile();
-		if (filename != null) {
-			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+		String str = e.getActionCommand();
+		if(str.startsWith("Save image")) {
+			FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
+			chooser.setVisible(true);
+			String filename = chooser.getFile();
+			if (filename != null) {
+				StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+			}
 		}
+
+		if(str.startsWith("Load")) {
+			FileDialog chooser = new FileDialog(StdDraw.frame, "Loading graph file", FileDialog.LOAD);
+			chooser.setVisible(true);
+			String filename = chooser.getFile();
+			if (filename != null) {
+				StdDraw.load(chooser.getDirectory() + File.separator + chooser.getFile());
+				gui.update();
+			}
+		}
+
+		if(str.startsWith("Save Graph")) {////check////
+
+			String filename = JOptionPane.showInputDialog(null, "Input a file name:");
+			graph.save(filename);
+			//			FileDialog chooser = new FileDialog(StdDraw.frame, "Saving graph file", FileDialog.SAVE);
+			//			chooser.setVisible(true);
+			//			String filename = chooser.getFile();
+			//			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+			System.out.println(filename);
+		}
+		if (str.equals("Is_Connected")){
+			boolean ans=graph.isConnected();
+			if(ans)
+				JOptionPane.showMessageDialog(null,"The graph is connecnted!");
+			else
+				JOptionPane.showMessageDialog(null,"The graph is not connecnted!");
+
+		}
+		if (str.equals("shortestPathDist")) {
+			Collection <node_data> arr_n= graph.getG().getV();
+			Integer[] options= new Integer [arr_n.size()];
+			int i=0;
+			for (node_data n : arr_n) {
+				options[i]= n.getKey();
+				i++;
+			}
+			int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
+					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+			int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
+					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+
+			double ans=graph.shortestPathDist(src,dest);
+			if(ans !=Double.MAX_VALUE)
+			{
+				JOptionPane.showMessageDialog(null,"The shortest path distance is:\n "+ans,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
+			}
+			else 
+			{
+				JOptionPane.showMessageDialog(null,"Err, There is no path between the points :", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+			}
+		}
+		if (str.equals("shortestPath")) {
+			Collection <node_data> arr_n= graph.getG().getV();
+			Integer[] options= new Integer [arr_n.size()];
+			int i=0;
+			for (node_data n : arr_n) {
+				options[i]= n.getKey();
+				i++;
+			}
+			int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
+					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+			int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
+					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+
+			List <node_data> ans=graph.shortestPath(src, dest);
+
+			if(ans != null)
+			{
+				String ans_keys="";
+				for (node_data n : ans) {
+					if(!n.equals(ans.get(ans.size()-1)))
+						ans_keys+=n.getKey()+"->";
+					else
+						ans_keys+=n.getKey();
+				}
+				JOptionPane.showMessageDialog(null,"The shortest path is:\n "+ans_keys,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
+			}
+			else 
+			{
+				JOptionPane.showMessageDialog(null,"Error: There is no path between the points :", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+			}
+		}
+
 	}
+
 
 
 	/***************************************************************************

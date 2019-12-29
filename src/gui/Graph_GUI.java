@@ -1,211 +1,142 @@
-package utils;
+package gui;
+
+import dataStructure.*;
+import utils.*;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.FileDialog;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.util.LinkedList;
+import java.awt.Font;
 
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
-
-import dataStructure.node_data;
+import java.util.Collection;
+import java.util.Iterator;
 
 
-public class Graph_GUI extends JFrame implements ActionListener, MouseListener{
+public class Graph_GUI {
+	graph g;
 
-	LinkedList<Point3D> points = new LinkedList<Point3D>();
-
-	public Graph_GUI() {
-//		Dimension d= new Dimension(900,900);
-//		this.setSize(d);
-		
-		this.setBounds(100, 200, 900, 900);
-		this.setLayout(new FlowLayout()); // simtri
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		setTitle("Standard Draw");
-		
-		MenuBar menuBar = new MenuBar();
-		this.setMenuBar(menuBar);
-		Menu file = new Menu("File");
-		menuBar.add(file);
-		MenuItem item1f = new MenuItem("Save_Image");
-		MenuItem item2f = new MenuItem("Load_Graph");
-		MenuItem item3f = new MenuItem("Sava Graph_file");
-		file.add(item1f);
-		file.add(item2f);
-		file.add(item3f);		      
-		item1f.addActionListener(this);
-		item2f.addActionListener(this);
-		item3f.addActionListener(this);
-		
-
-		Menu algo = new Menu("Algo");
-		menuBar.add(algo);
-		MenuItem item1a = new MenuItem("Is_Connected");
-		MenuItem item2a = new MenuItem("shortestPathDist");
-		MenuItem item3a = new MenuItem("TSP");
-		algo.add(item1a);
-		algo.add(item2a);
-		algo.add(item3a);
-		item1a.addActionListener(this);
-		item2a.addActionListener(this);
-		item3a.addActionListener(this);
-		this.addMouseListener(this);
-		
-//		JMenuBar menuBar = new JMenuBar();
-//		JMenu menu = new JMenu("File");
-//		menuBar.add(menu);
-//		JMenuItem menuItem1 = new JMenuItem(" Save...   ");
-//		menuItem1.addActionListener(this);
-//		menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-//				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-//		menu.add(menuItem1);
+	public void init (graph _g) {
+		this.g=_g;
+		StdDraw.initGraph(g);
 	}
-	
-		public void paint(Graphics g) {
-			super.paint(g);
-			Point3D prev = null;
-			for (Point3D p : points) {
-				g.setColor(Color.BLUE);
-				g.fillOval((int)p.x(), (int)p.y(), 10, 10);
+	public void initSize() {
+		StdDraw.setCanvasSize(500,500);
+		Range rx= rangeX(g.getV());
+		Range ry= rangeY(g.getV());
+		double limx=(rx.get_max()-rx.get_min())*0.1;
+		double limy=(ry.get_max()-ry.get_min())*0.1;
+		StdDraw.setXscale(rx.get_min()-limx, rx.get_max()+limx);
+		StdDraw.setYscale(ry.get_min()-limy, ry.get_max()+limy);
+	}
 
-				if(prev != null) { //draw between points
-					g.setColor(Color.RED);
-					g.drawLine((int)p.x(), (int)p.y(), (int)prev.x(), (int)prev.y());
-					///str=w //location print
-					g.drawString("5", (int)((p.x()+prev.x())/2), (int)((p.y()+prev.y())/2)); 
-					//g.drawString(, (int)((p.x()+prev.x())/2), (int)((p.y()+prev.y())/2));
+	public void drawGraph() {
+		initSize();
+		StdDraw.setFont(new Font("Calibri", Font.CENTER_BASELINE, 16));
+		Range ry= rangeY(g.getV());
+		for (node_data n : g.getV() ){
+			Point3D src=n.getLocation();
+			StdDraw.setPenRadius(0.02);
+			StdDraw.setPenColor(Color.BLUE);
+			StdDraw.point(src.x(), src.y());
+			StdDraw.text(src.x(), src.y()+0.03*ry.get_length(), "" + n.getKey());
+			if (g.getE(n.getKey()) != null) {
+				for(Iterator<edge_data> edgeIt=g.getE(n.getKey()).iterator();edgeIt.hasNext();) {
+					edge_data e=edgeIt.next();
+					Point3D dest=g.getNode(e.getDest()).getLocation();
+
+					//						StdDraw.filledCircle(dest.x(), dest.y(), 0.06);
+					//						StdDraw.text(dest.x(), dest.y() + 0.1, "" + g.getNode(e.getDest()).getKey());
+					StdDraw.setPenColor(Color.RED);
+					StdDraw.setPenRadius(0.006);
+					StdDraw.text((src.x()*0.2 +dest.x()*0.8), (src.y()*0.2+dest.y()*0.8)+0.1, "" + e.getWeight());
+					StdDraw.setPenColor(Color.BLACK);
+					StdDraw.setPenRadius();
+					StdDraw.line(src.x(), src.y(), dest.x(), dest.y());
+					StdDraw.setPenColor(Color.GREEN);
+					StdDraw.setPenRadius(0.02);
+					StdDraw.point((src.x()*0.1 +dest.x()*0.9),(src.y()*0.1 +dest.y()*0.9));
+					//						StdDraw.filledCircle((src.x()*0.1 +dest.x()*0.9), (src.y()*0.1 +dest.y()*0.9),0.06);
+
 				}
-				prev = p;
-			}
-		}
-		
-		private Range rangeX (LinkedList<Point3D> points) {
-			double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
-			for (Point3D p : points) {
-				if(p.x()<min) min=p.x();
-				else if(p.x()>max) max=p.x();
-			}
-			return new Range (min+10,max+10);
-		}
-		private Range rangeY (LinkedList<Point3D> points) {
-			double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
-			for (Point3D p : points) {
-				if(p.y()<min) min=p.y();
-				else if(p.y()>max) max=p.y();
-			}
-			return new Range (min+10,max+10);
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String str = e.getActionCommand();  ///////link to function
-//			if(str.startsWith("Save_Image")) {
-//				FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
-//				chooser.setVisible(true);
-//				String filename = chooser.getFile();
-//				if (filename != null) {
-//					StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
-//				}
-//			}
-//			if(str.startsWith("Load")) {
-//				FileDialog chooser = new FileDialog(StdDraw.frame, "Loading graph file", FileDialog.LOAD);
-//				chooser.setVisible(true);
-//				String filename = chooser.getFile();
-//				System.out.println(filename);
-//			}
-			if(str.startsWith("Is_Connected")) {
-//				Point3D	p1=new Point3D(-1,-1,1);
-//				Point3D	p2=new Point3D(-1,1,4);
-//				Point3D	p3=new Point3D(0,0,0);
-//				Point3D	p4=new Point3D(8,1,-1);
-//				Point3D	p5=new Point3D(-1,1,-1);
-//				Point3D	p6=new Point3D(10,5,1);
-//				Point3D	p7=new Point3D(9,0,1);
-				Point3D p1 = new Point3D(-100,100);
-				Point3D p2 = new Point3D(50,300);
-				Point3D p3 = new Point3D(400,150);
-				points.add(p1);
-				points.add(p2);
-				points.add(p3);
-//				points.add(p4);
-//				points.add(p5);
-//				points.add(p6);
-//				points.add(p7);
-				repaint();
-			}else if(str.equals("shortestPathDist")) {
-				Range rx= rangeX(points);
-				Range ry= rangeY(points);
-				Point3D p1 = new Point3D(rx.get_min(),rx.get_max());
-				Point3D p2 = new Point3D(rx.get_min(),rx.get_max());
-				points.add(p1);
-				points.add(p2);
-				StdDraw.setXscale(rx.get_min(), rx.get_max());
-				StdDraw.setXscale(ry.get_min(), ry.get_max());
-				
-			}else if(str.equals("TSP")){
-				Point3D p3 = new Point3D(400,150);
-				points.add(p3);
-				repaint();
 
 			}
-			
-			
-			
 		}
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
+	public void update() {
+		StdDraw.clear();
+		this.drawGraph();
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	private Range rangeX (Collection<node_data> nodes) {
+		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
+		for (node_data n: nodes) {
+			if(n.getLocation().x()<min) min=n.getLocation().x();
+			else if(n.getLocation().x()>max) max=n.getLocation().x();
+		}
+		return new Range (min,max);
 	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		double x = e.getX();
-		double y = e.getY();
-		Point3D p = new Point3D(x,y);
-		points.add(p);
-		repaint();		
+	private Range rangeY (Collection<node_data> nodes) {
+		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
+		for (node_data n: nodes)  {
+			if(n.getLocation().y()<min) min=n.getLocation().y();
+			else if(n.getLocation().y()>max) max=n.getLocation().y();
+		}
+		return new Range (min,max);
 	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	public static void main(String[] args) {
+
+		graph g= new DGraph();
+		Point3D p1,p2,p3,p4,p5,p6,p7;
+		node_data n1,n2,n3,n4,n5,n6,n7;
+
+
+		p1=new Point3D(-10,-10,0);
+		p2=new Point3D(-10,10,0);
+		p3=new Point3D(40,0,0);
+		p4=new Point3D(80,10,0);
+		p5=new Point3D(80,-10,0);
+		p6=new Point3D(90,30,0);
+		p7=new Point3D(100,0,0);
+		//		p1=new Point3D(-1,2,0);
+		//		p2=new Point3D(-1,3,0);
+		//		p3=new Point3D(4,2.5,0);
+		//		p4=new Point3D(8,3,0);
+		//		p5=new Point3D(8,2,0);
+		//		p6=new Point3D(10,4,0);
+		//		p7=new Point3D(9,1,0);
+
+
+		n1=new Node(1,p1,0,null,0);
+		n2=new Node(2,p2,0,null,0);
+		n3=new Node(3,p3,0,null,0);
+		n4=new Node(4,p4,0,null,0);
+		n5=new Node(5,p5,0,null,0);
+		n6=new Node(6,p6,0,null,0);
+		n7=new Node(7,p7,0,null,0);
+
+		g.addNode(n1);
+		g.addNode(n2);
+		g.addNode(n3);
+		g.addNode(n4);
+		g.addNode(n5);
+		g.addNode(n6);
+		g.addNode(n7);
+
+		g.connect(n1.getKey(), n2.getKey(), 4);
+		g.connect(n2.getKey(), n1.getKey(), 4);
+		g.connect(n1.getKey(), n3.getKey(), 3);
+		g.connect(n2.getKey(), n4.getKey(), 5);
+		g.connect(n3.getKey(), n2.getKey(), 1);
+		g.connect(n3.getKey(), n5.getKey(), 8);
+		g.connect(n4.getKey(), n3.getKey(), 11);
+		g.connect(n4.getKey(), n6.getKey(), 2);
+		g.connect(n5.getKey(), n4.getKey(), 2);
+		g.connect(n5.getKey(), n1.getKey(), 7);
+		g.connect(n5.getKey(), n7.getKey(), 5);
+		g.connect(n6.getKey(), n7.getKey(), 3);
+		g.connect(n7.getKey(), n4.getKey(), 10);
 		Graph_GUI app = new Graph_GUI();
-		app.setVisible(true);
+		app.init(g);
+		app.drawGraph();
 	}
+
 
 }
