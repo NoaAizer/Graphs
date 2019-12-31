@@ -2,6 +2,7 @@ package Tests;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -25,6 +26,7 @@ public class Graph_AlgoTest {
 	@BeforeEach
 	void setupGraphs() {
 		ga.init(g);
+		;
 		//		for(int i=1;i<7;i++) {
 		//			Point3D p=new Point3D(i,i+1,i+2);
 		//			node_data n= new Node(i, p);
@@ -183,9 +185,7 @@ public class Graph_AlgoTest {
 			ans_keys+=n.getKey();
 		assertEquals("There is shorther path",ans_keys,"13546");
 		edge_data e2=g.removeEdge(4, 6);
-		ans=ga.shortestPath(1,6);
-		ans_keys="";
-		assertEquals("There is no path",ans_keys,"");
+		assertNull("There is no path",ga.shortestPath(1,6));
 		g.connect(e1.getSrc(),e1.getDest(),e1.getWeight());
 		g.connect(e2.getSrc(),e2.getDest(),e2.getWeight());
 		ans=ga.shortestPath(2,7);
@@ -200,15 +200,34 @@ public class Graph_AlgoTest {
 			ans_keys+=n.getKey();
 		assertEquals("There is shorther path",ans_keys,"267");
 	}
-	
+
 	/**
 	 * Test TSP(list nodes) function
 	 */
 	@Test
 	public void testTSP() {
-		fail("Not implemented yet");
+		List<Integer> checkList=new ArrayList <Integer>();
+		checkList.add(1);
+		checkList.add(4);
+		checkList.add(7);
+		List<node_data> path=new ArrayList  <node_data>();
+		List<Integer> actual=new ArrayList <Integer>();
+		List<Integer> expected=new ArrayList <Integer>();
+		expected.add(1);expected.add(2);expected.add(4);expected.add(6);expected.add(7);
+		path=ga.TSP(checkList);
+		for(int i=0;i<path.size();i++)
+			actual.add(path.get(i).getKey());
+		assertEquals(expected, actual);
+		//node 1 is not connected to the other.
+		ga.getG().removeEdge(2,1);
+		ga.getG().removeEdge(5,1);
+		checkList.add(1);
+		checkList.add(4);
+		checkList.add(7);
+		path=ga.TSP(checkList);
+		assertNull("There is no path",path);
 	}
-	
+
 	/**
 	 * Test copy() function
 	 */

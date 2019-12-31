@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class Graph_Algo implements graph_algorithms{
 	public void save(String file_name) 
 	{
 		try
-		{    
+		{  
 			FileOutputStream file = new FileOutputStream(file_name); 
 			ObjectOutputStream out = new ObjectOutputStream(file); 
 			out.writeObject(g); 
@@ -140,7 +141,7 @@ public class Graph_Algo implements graph_algorithms{
 		}
 		return g.getNode(dest).getWeight();
 	}
-	
+
 
 	/**
 	 * returns the the shortest path between src to dest - as an ordered List of nodes:
@@ -181,9 +182,46 @@ public class Graph_Algo implements graph_algorithms{
 	 * @return
 	 */
 	@Override
-	public List<node_data> TSP(List<Integer> targets) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<node_data> TSP(List<Integer> targets) 
+	{
+		if(!haveAPath(targets))return null;// Checks if there a path between these nodes.
+		List<node_data> path=new ArrayList<node_data>();
+		double tempMin=Double.POSITIVE_INFINITY;
+		int currShortestSrcIn=0;
+		for(int j=0;j<targets.size();j++) {
+			double min=shortestPathDistToAll(j, targets);
+			if(min<tempMin) {
+				currShortestSrcIn=j;
+				tempMin=min;
+			}
+		}
+		//int srcIndex=(int)(Math.random()*targets.size());// Randomly takes one of the nodes in the list as a src node
+		int srcIndex=currShortestSrcIn;
+		int src= targets.get(srcIndex);
+		int destIndex=0,dest=0;
+		targets.remove(srcIndex);
+		path.add(g.getNode(src));
+		while(!targets.isEmpty()) {
+			double minPath=Double.POSITIVE_INFINITY;
+			//Finds the shortest path between the src and one of the nodes
+			for(int i=0;i<targets.size();i++) {
+				double dist=shortestPathDist(src, targets.get(i));
+				if(dist<minPath) {
+					minPath=dist;
+					dest=targets.get(i);
+					destIndex=i;
+				}
+			}
+			List<node_data> tempPath=shortestPath(src, dest);
+			boolean flag_first=true;
+			for (node_data n : tempPath) {
+				if(flag_first) flag_first=false;
+				else path.add(n);
+			}
+			targets.remove(destIndex);
+			src=dest;
+		}
+		return path;
 	}
 	/** 
 	 * Compute a deep copy of this graph.
@@ -191,12 +229,13 @@ public class Graph_Algo implements graph_algorithms{
 	 */
 	@Override
 	public graph copy() {
-		graph g_copy= new DGraph();
+		DGraph g_copy= new DGraph();
 		for (node_data n : g.getV()) {
 			g_copy.addNode(n);
 		}
 		for (node_data n : g.getV()) {
-			g_copy.addNode(n);
+			if(g_copy.getNodes().get(n.getKey())==null)
+				g_copy.addNode(n);
 			for (edge_data e : g.getE(n.getKey())) 
 				g_copy.connect(e.getSrc(),e.getDest(),e.getWeight());
 		}
@@ -231,7 +270,7 @@ public class Graph_Algo implements graph_algorithms{
 		// If DFS traversal doesn't visit all nodes, then return false.
 		for(Iterator<node_data> it=gr.getV().iterator();it.hasNext();) {
 			node_data v=it.next();
-			if(g.getNode(v.getKey()).getTag()==0)
+			if(gr.getNode(v.getKey()).getTag()==0)
 				return false;
 		}
 		return true;
@@ -303,4 +342,99 @@ public class Graph_Algo implements graph_algorithms{
 		return minNode;
 	}
 
+	/**
+	 * Calculates the shortest path from one of the nodes in the target list to the rest.
+	 * @param srcIndex teh index of this node.
+	 * @param targets 
+	 * @return the shortest path distance from the requested node
+	 */
+	private double shortestPathDistToAll(int srcIndex,List<Integer> targets) {
+		List<node_data> path=new ArrayList<node_data>();
+		List<Integer> targetsTemp=new ArrayList<Integer>();
+		double min= Double.POSITIVE_INFINITY;
+		for (Integer tar : targets) {
+			targetsTemp.add(tar);
+		}
+		int src= targetsTemp.get(srcIndex);
+		int destIndex=0,dest=0;
+		targetsTemp.remove(srcIndex);
+		path.add(g.getNode(src));
+		while(!targetsTemp.isEmpty()) {
+			double minPath=Double.POSITIVE_INFINITY;
+			//Finds the shortest path between the src and one of the nodes
+			for(int i=0;i<targetsTemp.size();i++) {
+				double dist=shortestPathDist(src, targetsTemp.get(i));
+				if(dist<minPath) {
+					minPath=dist;
+					dest=targetsTemp.get(i);
+					destIndex=i;
+				}
+			}
+			min+=minPath;
+			targetsTemp.remove(destIndex);
+			src=dest;
+		}
+		return min; 
+	}
+	/**
+	 * Checks if there a path between some of the nodes in the graph
+	 * @param targets represents a list of the requested nodes in the graph
+	 * @return true- if there a path, otherwise return false.
+	 */
+	private boolean haveAPath(List<Integer> targets) {
+		Graph_Algo ga=new Graph_Algo();
+		ga.init(g);
+		List<Integer>keys=new ArrayList<Integer>();
+		for (Iterator<node_data> itNode = g.getV().iterator(); itNode.hasNext();) 
+			keys.add(itNode.next().getKey());
+		boolean src=false,first=true;
+		int srcID=0;
+		//Checks if the src node is in the node targets list.
+		for(Iterator<node_data> it=ga.getG().getV().iterator();it.hasNext()&&first;) {
+			int key=it.next().getKey();
+			if(targets.contains(key)) {
+				src=true;
+				srcID=key;
+			}
+			first=false;
+		}
+		if(src) {
+			//Checks if there is a path to the src node.
+			ga.isSrcConnect();
+			first=true;
+			for (Integer key : keys) {
+				if(key!=srcID) {
+					if(targets.contains(key)&&ga.getG().getNode(key).getTag()==0)
+						return false;
+				}
+			}
+		}
+		ga.isConnect();	
+		for (Integer key : keys) {
+			if(key!=srcID) {
+				if(targets.contains(key)&&ga.getG().getNode(key).getTag()==0)
+					return false;
+			}
+		}
+		return true;
+	}
+	/**
+	 * Checks if the graph is connected (except a path to the source node)
+	 * @return the graph after visiting the nodes.
+	 */
+	private graph isConnect() {
+		if(g.getV()==null)return null;//there are no nodes
+		boolean result=runDFS(g);
+		if(!result) return null;//DFS traversal doesn't visit all nodes.
+		return g;
+	}
+	/**
+	 * Checks if there a path to the source node from the other nodes.
+	 * @return  the graph after visiting the nodes.
+	 */
+	private graph isSrcConnect() {
+		graph tran_g=getTranspose(g);//Create a reversed graph 
+		runDFS(tran_g);//Do DFS for reversed graph starting from the same node as before.
+		return g;
+	}
 }

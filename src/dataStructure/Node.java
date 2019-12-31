@@ -76,7 +76,7 @@ public Node(int key,Point3D location) {
 	}
 public String toString()
 {
-String node= "key: "+this.getKey()+" location: "+this.getLocation()+" weight: "+this.getWeight()+" info: "+this.getInfo();
+String node= "key: "+this.getKey()+" location: "+this.getLocation()+" weight: "+this.getWeight();
 	if(this.getTag()==0)
 		node+=" not visited!";
 	else

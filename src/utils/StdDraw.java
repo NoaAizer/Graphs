@@ -68,8 +68,9 @@ import java.io.IOException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -1649,6 +1650,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		if (filename == null) throw new IllegalArgumentException();
 		graph.init(filename);
 		gui.init(graph.getG());
+
 	}
 	/**
 	 * Saves the drawing to using the specified filename.
@@ -1666,6 +1668,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		if ("png".equalsIgnoreCase(suffix)) {
 			try {
 				ImageIO.write(onscreenImage, suffix, file);
+				JOptionPane.showMessageDialog(null,"The file is saved!");
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -1686,6 +1689,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			BufferedImage rgbBuffer = new BufferedImage(newCM, newRaster, false,  null);
 			try {
 				ImageIO.write(rgbBuffer, suffix, file);
+				JOptionPane.showMessageDialog(null,"The file is saved!");
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -1694,7 +1698,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 		else {
 			JOptionPane.showMessageDialog(null,"Invalid image file type: "+suffix,"", JOptionPane.INFORMATION_MESSAGE);
-			//System.out.println("Invalid image file type: " + suffix);
 		}
 	}
 
@@ -1728,12 +1731,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		if(str.startsWith("Save Graph")) {////check////
 
 			String filename = JOptionPane.showInputDialog(null, "Input a file name:");
-			graph.save(filename);
+			if (filename != null) {
+				graph.save(filename);
+			}
+
 			//			FileDialog chooser = new FileDialog(StdDraw.frame, "Saving graph file", FileDialog.SAVE);
 			//			chooser.setVisible(true);
 			//			String filename = chooser.getFile();
 			//			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
-			System.out.println(filename);
 		}
 		if (str.equals("Is_Connected")){
 			boolean ans=graph.isConnected();
@@ -1751,19 +1756,23 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				options[i]= n.getKey();
 				i++;
 			}
-			int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
-					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
-			int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
-					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+			try {
+				int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
+						"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+				int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
+						"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
 
-			double ans=graph.shortestPathDist(src,dest);
-			if(ans !=Double.MAX_VALUE)
-			{
-				JOptionPane.showMessageDialog(null,"The shortest path distance is:\n "+ans,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
+				double ans=graph.shortestPathDist(src,dest);
+				if(ans !=Double.POSITIVE_INFINITY)
+				{
+					JOptionPane.showMessageDialog(null,"The shortest path distance is:\n "+ans,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
+				}
+				else 
+				{
+					JOptionPane.showMessageDialog(null,"Error, There is no path between the points!", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+				}
 			}
-			else 
-			{
-				JOptionPane.showMessageDialog(null,"Err, There is no path between the points :", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+			catch(Exception ex) {
 			}
 		}
 		if (str.equals("shortestPath")) {
@@ -1774,33 +1783,67 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 				options[i]= n.getKey();
 				i++;
 			}
-			int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
-					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
-			int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
-					"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+			try {
+				int src = (Integer)JOptionPane.showInputDialog(null, "Pick a source node:", 
+						"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
+				int dest = (Integer)JOptionPane.showInputDialog(null, "Pick a destination node:", 
+						"Pick a node:", JOptionPane.QUESTION_MESSAGE, null, options, null);
 
-			List <node_data> ans=graph.shortestPath(src, dest);
+				List <node_data> ans=graph.shortestPath(src, dest);
 
-			if(ans != null)
-			{
-				String ans_keys="";
-				for (node_data n : ans) {
-					if(!n.equals(ans.get(ans.size()-1)))
-						ans_keys+=n.getKey()+"->";
-					else
-						ans_keys+=n.getKey();
+				if(ans != null)
+				{
+					String ans_keys="";
+					for (node_data n : ans) {
+						if(!n.equals(ans.get(ans.size()-1)))
+							ans_keys+=n.getKey()+"->";
+						else
+							ans_keys+=n.getKey();
+					}
+					JOptionPane.showMessageDialog(null,"The shortest path is:\n "+ans_keys,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
 				}
-				JOptionPane.showMessageDialog(null,"The shortest path is:\n "+ans_keys,"shortest path points "+src+"-"+dest, JOptionPane.INFORMATION_MESSAGE);
+				else 
+				{
+					JOptionPane.showMessageDialog(null,"Error: There is no path between the points :", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+				}
 			}
-			else 
-			{
-				JOptionPane.showMessageDialog(null,"Error: There is no path between the points :", "shortest path points \"+src+\"-\"+dst", JOptionPane.INFORMATION_MESSAGE);	
+			catch(Exception ex) {
+
 			}
 		}
+		if(str.equals("TSP")) {
 
+		}
 	}
 
+	private List<Integer> targetsForTSP=new ArrayList<Integer>();
 
+	private node_data findNode(double x,double y) {
+		for(Iterator<node_data> verIter=graph.getG().getV().iterator();verIter.hasNext();) {
+			node_data nd=verIter.next();
+			if(Math.abs(x-nd.getLocation().x())<=0.2&&Math.abs(y-nd.getLocation().y())<=0.2)
+				return nd;
+		}
+		return null;
+	}
+	private void paintTSP(List<Integer> targets) 
+	{
+		List <Integer> t=new ArrayList();
+		for(int i=0;i<targets.size();i++) {//copy for targets because TSP delete the targets. 
+			t.add(targets.get(i));
+		}
+		List<node_data> ver=graph.TSP(t);
+
+		for(int i=0;i<ver.size()-1;i++)
+		{
+			StdDraw.setPenColor(Color.PINK);
+			StdDraw.setPenRadius(0.005);
+			StdDraw.line(ver.get(i).getLocation().x(),ver.get(i).getLocation().y(),ver.get(i+1).getLocation().x(),ver.get(i+1).getLocation().y());
+			StdDraw.setPenColor(Color.GREEN);
+			StdDraw.setPenRadius(0.015);
+			StdDraw.point(ver.get(i+1).getLocation().x(),ver.get(i+1).getLocation().y());
+		}
+	}
 
 	/***************************************************************************
 	 *  Mouse interactions.
@@ -1886,8 +1929,38 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			mouseX = StdDraw.userX(e.getX());
 			mouseY = StdDraw.userY(e.getY());
 			isMousePressed = true;
+			//			String key;
+			//			key= JOptionPane.showInputDialog(null, "Enter the new node key:");
+			//			int ID=graph.getG().nodeSize()+1;
+			//			try {
+			//				 ID=Integer.parseInt(key);
+			//			} catch (NumberFormatException ex) {
+			//				System.out.println(ex.getMessage());
+			//				key= JOptionPane.showInputDialog(null, "Enter the new node key:");
+			//			}
+			//			
+			//			Point3D p = new Point3D(mouseX,mouseY);
+			//			node_data n=new Node(ID,p);
+			//			graph.getG().addNode(n);
+			//			gui.init(graph.getG());
+			//			System.out.println(n);
+			//			gui.drawGraph();
+			System.out.println(mouseX);
+			System.out.println(mouseY);
+			if(this.findNode(mouseX,mouseY)!=null) {
+				System.out.println("mousePressed");
+				this.targetsForTSP.add(this.findNode(mouseX,mouseY).getKey());
+				StdDraw.setPenColor(Color.GREEN);
+				StdDraw.setPenRadius(0.015);
+				StdDraw.point(this.findNode(mouseX,mouseY).getLocation().x(), this.findNode(mouseX,mouseY).getLocation().y());
+			}
+			if(this.targetsForTSP.size()>1) {
+				gui.drawGraph();
+				this.paintTSP(this.targetsForTSP);
+			}
 		}
 	}
+
 
 	/**
 	 * This method cannot be called directly.

@@ -26,14 +26,6 @@ public class DGraph implements graph, Serializable{
 		this.edges = (HashMap<Integer,HashMap<Integer,edge_data>>) g.getEdges();
 	}
 
-	public HashMap<Integer, node_data> getNodes() {
-		return this.nodes;
-	}
-
-	public HashMap<Integer, HashMap<Integer, edge_data>> getEdges() {
-		return this.edges;
-	}
-
 	@Override
 	public node_data getNode(int key) {
 		if(nodes.containsKey(key))
@@ -52,9 +44,14 @@ public class DGraph implements graph, Serializable{
 
 	@Override
 	public void addNode(node_data n) {
-			if(!nodes.containsValue(n)) {
+		try {
+			if(nodes.get(n.getKey())!=null)
+				throw new RuntimeException("ERR: The node is already exist in the graph");
 			nodes.put(n.getKey(),n);
 			mc++;
+		}
+		catch(Exception e) {
+			System.out.println(e.getMessage());
 		}
 	}
 
@@ -65,7 +62,8 @@ public class DGraph implements graph, Serializable{
 				throw new RuntimeException("ERR: The weight should be larger than 0");
 			if(src==dest)
 				throw new RuntimeException("ERR: The nodes should be different");
-			if(nodes.containsKey(src)&&nodes.containsKey(dest)) {	
+			if(!nodes.containsKey(src)||!nodes.containsKey(dest)) 
+				throw new RuntimeException("ERR: One of the node is not exist");
 			Edge e = new Edge(src, dest, w,"",0);	
 			if(!edges.containsKey(src)) {//if the src node is already exist
 				HashMap<Integer,edge_data> newEdge= new HashMap<Integer,edge_data>();//empty hashmap
@@ -74,7 +72,6 @@ public class DGraph implements graph, Serializable{
 			edges.get(src).put(dest,e);
 			mc++;
 			edgesCounter++;
-			}
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
@@ -141,5 +138,12 @@ public class DGraph implements graph, Serializable{
 	@Override
 	public int getMC() {
 		return mc;
+	}
+	public HashMap<Integer, node_data> getNodes() {
+		return this.nodes;
+	}
+
+	public HashMap<Integer, HashMap<Integer, edge_data>> getEdges() {
+		return this.edges;
 	}
 }

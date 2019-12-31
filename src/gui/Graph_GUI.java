@@ -19,8 +19,8 @@ public class Graph_GUI {
 	}
 	public void initSize() {
 		StdDraw.setCanvasSize(500,500);
-		Range rx= rangeX(g.getV());
-		Range ry= rangeY(g.getV());
+		Range rx= rangeX(this.g.getV());
+		Range ry= rangeY(this.g.getV());
 		double limx=(rx.get_max()-rx.get_min())*0.1;
 		double limy=(ry.get_max()-ry.get_min())*0.1;
 		StdDraw.setXscale(rx.get_min()-limx, rx.get_max()+limx);
@@ -29,34 +29,13 @@ public class Graph_GUI {
 
 	public void drawGraph() {
 		initSize();
-		StdDraw.setFont(new Font("Calibri", Font.CENTER_BASELINE, 16));
-		Range ry= rangeY(g.getV());
 		for (node_data n : g.getV() ){
-			Point3D src=n.getLocation();
-			StdDraw.setPenRadius(0.02);
-			StdDraw.setPenColor(Color.BLUE);
-			StdDraw.point(src.x(), src.y());
-			StdDraw.text(src.x(), src.y()+0.03*ry.get_length(), "" + n.getKey());
+			drawNode(this.g,n);
 			if (g.getE(n.getKey()) != null) {
 				for(Iterator<edge_data> edgeIt=g.getE(n.getKey()).iterator();edgeIt.hasNext();) {
 					edge_data e=edgeIt.next();
-					Point3D dest=g.getNode(e.getDest()).getLocation();
-
-					//						StdDraw.filledCircle(dest.x(), dest.y(), 0.06);
-					//						StdDraw.text(dest.x(), dest.y() + 0.1, "" + g.getNode(e.getDest()).getKey());
-					StdDraw.setPenColor(Color.RED);
-					StdDraw.setPenRadius(0.006);
-					StdDraw.text((src.x()*0.2 +dest.x()*0.8), (src.y()*0.2+dest.y()*0.8)+0.1, "" + e.getWeight());
-					StdDraw.setPenColor(Color.BLACK);
-					StdDraw.setPenRadius();
-					StdDraw.line(src.x(), src.y(), dest.x(), dest.y());
-					StdDraw.setPenColor(Color.GREEN);
-					StdDraw.setPenRadius(0.02);
-					StdDraw.point((src.x()*0.1 +dest.x()*0.9),(src.y()*0.1 +dest.y()*0.9));
-					//						StdDraw.filledCircle((src.x()*0.1 +dest.x()*0.9), (src.y()*0.1 +dest.y()*0.9),0.06);
-
+					drawEdge(this.g,e);
 				}
-
 			}
 		}
 	}
@@ -65,7 +44,36 @@ public class Graph_GUI {
 		this.drawGraph();
 
 	}
-	private Range rangeX (Collection<node_data> nodes) {
+	private static void drawNode(graph gr,node_data n) {
+		StdDraw.setFont(new Font("Calibri", Font.CENTER_BASELINE, 16));
+		Range ry= rangeY(gr.getV());
+		Point3D src=n.getLocation();
+		StdDraw.setPenRadius(0.02);
+		StdDraw.setPenColor(Color.BLUE);
+		StdDraw.point(src.x(), src.y());
+		StdDraw.text(src.x(), src.y()+0.03*ry.get_length(), "" + n.getKey());
+	}
+	private static void drawEdge(graph gr,edge_data e) {
+		node_data src=gr.getNode(e.getSrc());
+		node_data dest=gr.getNode(e.getDest());
+		Point3D s= src.getLocation();
+		Point3D d=dest.getLocation();
+		StdDraw.setPenColor(Color.BLACK);
+		StdDraw.setPenRadius();
+		StdDraw.line(s.x(), s.y(), d.x(), d.y());
+		double x1=s.x()+(d.x()-s.x())*0.9;
+		double y1=s.y()+(d.y()-s.y())*0.9;
+		StdDraw.setPenRadius(0.02);	
+		StdDraw.setPenColor(Color.yellow);
+		StdDraw.point(x1, y1);
+		double x0=(s.x()+3*d.x())/4;
+		double y0=(s.y()+3*d.y())/4;
+		double w =((int)e.getWeight()*10)/10.0;
+		StdDraw.setPenColor(Color.RED);
+		StdDraw.setPenRadius(0.006);
+		StdDraw.text(x0, y0, ""+w);
+	}
+	private static Range rangeX (Collection<node_data> nodes) {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes) {
 			if(n.getLocation().x()<min) min=n.getLocation().x();
@@ -73,7 +81,7 @@ public class Graph_GUI {
 		}
 		return new Range (min,max);
 	}
-	private Range rangeY (Collection<node_data> nodes) {
+	private static Range rangeY (Collection<node_data> nodes) {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes)  {
 			if(n.getLocation().y()<min) min=n.getLocation().y();
@@ -86,7 +94,6 @@ public class Graph_GUI {
 		graph g= new DGraph();
 		Point3D p1,p2,p3,p4,p5,p6,p7;
 		node_data n1,n2,n3,n4,n5,n6,n7;
-
 
 		p1=new Point3D(-10,-10,0);
 		p2=new Point3D(-10,10,0);
