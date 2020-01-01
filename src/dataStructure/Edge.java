@@ -84,11 +84,7 @@ public class Edge implements edge_data, Serializable{
 	}
 	public String toString()
 	{
-		String edge= "src: "+this.getSrc()+" dest: "+this.getDest()+" weight: "+this.getWeight()+" info: "+this.getInfo();
-		if(this.getTag()==0)
-			edge+=" not visited!";
-		else
-			edge+=" visited!";
+		String edge= "src: "+this.getSrc()+" dest: "+this.getDest()+" weight: "+this.getWeight();
 		return edge;
 	}
 }

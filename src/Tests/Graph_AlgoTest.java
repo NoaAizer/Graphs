@@ -26,18 +26,7 @@ public class Graph_AlgoTest {
 	@BeforeEach
 	void setupGraphs() {
 		ga.init(g);
-		;
-		//		for(int i=1;i<7;i++) {
-		//			Point3D p=new Point3D(i,i+1,i+2);
-		//			node_data n= new Node(i, p);
-		//			g.addNode(n);
-		//		}
-		//
-		//		g.connect(1,2,3);
-		//		g.connect(1, 5, 4);
-		//		g.connect(2, 5, 3);
-		//		g.connect(4, 2, 1);
-		//	}
+
 		Point3D p1,p2,p3,p4,p5,p6,p7;
 		node_data n1,n2,n3,n4,n5,n6,n7;
 
@@ -207,9 +196,9 @@ public class Graph_AlgoTest {
 	@Test
 	public void testTSP() {
 		List<Integer> checkList=new ArrayList <Integer>();
-		checkList.add(1);
 		checkList.add(4);
 		checkList.add(7);
+		checkList.add(1);
 		List<node_data> path=new ArrayList  <node_data>();
 		List<Integer> actual=new ArrayList <Integer>();
 		List<Integer> expected=new ArrayList <Integer>();
@@ -217,7 +206,11 @@ public class Graph_AlgoTest {
 		path=ga.TSP(checkList);
 		for(int i=0;i<path.size();i++)
 			actual.add(path.get(i).getKey());
-		assertEquals(expected, actual);
+		if(!actual.contains(1)||!actual.contains(4)||!actual.contains(7))
+			fail("The path doesn't contain all the requested nodes.");
+		if(actual.get(0)==1) assertEquals(actual.toString(),"[1, 2, 4, 6, 7]");
+		if(actual.get(0)==4) assertEquals(actual.toString(),"[4, 6, 7, 4, 3, 2, 1]");
+		if(actual.get(0)==7) assertEquals(actual.toString(),"[7, 4, 3, 2, 1]");
 		//node 1 is not connected to the other.
 		ga.getG().removeEdge(2,1);
 		ga.getG().removeEdge(5,1);

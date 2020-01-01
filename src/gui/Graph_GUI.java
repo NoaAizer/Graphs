@@ -13,20 +13,31 @@ import java.util.Iterator;
 public class Graph_GUI {
 	graph g;
 
+	/**
+	 * Add a graph to draw
+	 * @param _g represents the graph for the drawing.
+	 */
 	public void init (graph _g) {
 		this.g=_g;
 		StdDraw.initGraph(g);
 	}
+	
+	/**
+	 * Initialize the size of the frame according to the x,y ranges.
+	 */
 	public void initSize() {
-		StdDraw.setCanvasSize(500,500);
+		StdDraw.setCanvasSize(600,600);
 		Range rx= rangeX(this.g.getV());
 		Range ry= rangeY(this.g.getV());
-		double limx=(rx.get_max()-rx.get_min())*0.1;
-		double limy=(ry.get_max()-ry.get_min())*0.1;
+		double limx=(rx.get_max()-rx.get_min())*0.2;
+		double limy=(ry.get_max()-ry.get_min())*0.2;
 		StdDraw.setXscale(rx.get_min()-limx, rx.get_max()+limx);
 		StdDraw.setYscale(ry.get_min()-limy, ry.get_max()+limy);
 	}
 
+	/**
+	 * Drawing the graph in the frame.
+	 */
 	public void drawGraph() {
 		initSize();
 		for (node_data n : g.getV() ){
@@ -39,11 +50,20 @@ public class Graph_GUI {
 			}
 		}
 	}
+	
+	/**
+	 * Open a new frame with the updated graph.(and close the previous frame). 
+	 */
 	public void update() {
 		StdDraw.clear();
 		this.drawGraph();
 
 	}
+	/**
+	 * Draws a given node on the frame.
+	 * @param gr represents the given graph.
+	 * @param n represents the node for drawing.
+	 */
 	private static void drawNode(graph gr,node_data n) {
 		StdDraw.setFont(new Font("Calibri", Font.CENTER_BASELINE, 16));
 		Range ry= rangeY(gr.getV());
@@ -53,6 +73,11 @@ public class Graph_GUI {
 		StdDraw.point(src.x(), src.y());
 		StdDraw.text(src.x(), src.y()+0.03*ry.get_length(), "" + n.getKey());
 	}
+	/**
+	 * Draws a given edge on the frame.
+	 * @param gr represents the given graph.
+	 * @param e represents the edge for drawing.
+	 */
 	private static void drawEdge(graph gr,edge_data e) {
 		node_data src=gr.getNode(e.getSrc());
 		node_data dest=gr.getNode(e.getDest());
@@ -73,7 +98,12 @@ public class Graph_GUI {
 		StdDraw.setPenRadius(0.006);
 		StdDraw.text(x0, y0, ""+w);
 	}
-	private static Range rangeX (Collection<node_data> nodes) {
+	/**
+	 * Creates a range of the x values of the nodes.
+	 * @param nodes represents a list with all the nodes in the graph.
+	 * @return the x range.
+	 */
+	public static Range rangeX (Collection<node_data> nodes) {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes) {
 			if(n.getLocation().x()<min) min=n.getLocation().x();
@@ -81,7 +111,12 @@ public class Graph_GUI {
 		}
 		return new Range (min,max);
 	}
-	private static Range rangeY (Collection<node_data> nodes) {
+	/**
+	 * Creates a range of the y values of the nodes.
+	 * @param nodes represents a list with all the nodes in the graph.
+	 * @return the y range.
+	 */
+	public static Range rangeY (Collection<node_data> nodes) {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes)  {
 			if(n.getLocation().y()<min) min=n.getLocation().y();
@@ -89,6 +124,8 @@ public class Graph_GUI {
 		}
 		return new Range (min,max);
 	}
+	
+	
 	public static void main(String[] args) {
 
 		graph g= new DGraph();
@@ -102,22 +139,15 @@ public class Graph_GUI {
 		p5=new Point3D(80,-10,0);
 		p6=new Point3D(90,30,0);
 		p7=new Point3D(100,0,0);
-		//		p1=new Point3D(-1,2,0);
-		//		p2=new Point3D(-1,3,0);
-		//		p3=new Point3D(4,2.5,0);
-		//		p4=new Point3D(8,3,0);
-		//		p5=new Point3D(8,2,0);
-		//		p6=new Point3D(10,4,0);
-		//		p7=new Point3D(9,1,0);
 
 
-		n1=new Node(1,p1,0,null,0);
-		n2=new Node(2,p2,0,null,0);
-		n3=new Node(3,p3,0,null,0);
-		n4=new Node(4,p4,0,null,0);
-		n5=new Node(5,p5,0,null,0);
-		n6=new Node(6,p6,0,null,0);
-		n7=new Node(7,p7,0,null,0);
+		n1=new Node(1,p1);
+		n2=new Node(2,p2);
+		n3=new Node(3,p3);
+		n4=new Node(4,p4);
+		n5=new Node(5,p5);
+		n6=new Node(6,p6);
+		n7=new Node(7,p7);
 
 		g.addNode(n1);
 		g.addNode(n2);

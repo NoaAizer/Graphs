@@ -1,35 +1,5 @@
 package utils;
 
-
-
-//package stdDraw;
-// https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java.html
-/******************************************************************************
- *  Compilation:  javac StdDraw.java
- *  Execution:    java StdDraw
- *  Dependencies: none
- *
- *
- *  Standard drawing library. This class provides a basic capability for
- *  creating drawings with your programs. It uses a simple graphics model that
- *  allows you to create drawings consisting of points, lines, and curves
- *  in a window on your computer and to save the drawings to a file.
- *
- *  Todo
- *  ----
- *    -  Add support for gradient fill, etc.
- *    -  Fix setCanvasSize() so that it can only be called once.
- *    -  On some systems, drawing a line (or other shape) that extends way
- *       beyond canvas (e.g., to infinity) dimensions does not get drawn.
- *
- *  Remarks
- *  -------
- *    -  don't use AffineTransform for rescaling since it inverts
- *       images and strings
- *
- ******************************************************************************/
-
-
 import gui.Graph_GUI;
 import algorithms.Graph_Algo;
 import dataStructure.*;
@@ -71,6 +41,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -78,17 +49,39 @@ import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-
 import javax.swing.KeyStroke;
 
-
+//https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java.html
+/******************************************************************************
+*  Compilation:  javac StdDraw.java
+*  Execution:    java StdDraw
+*  Dependencies: none
+*
+*
+*  Standard drawing library. This class provides a basic capability for
+*  creating drawings with your programs. It uses a simple graphics model that
+*  allows you to create drawings consisting of points, lines, and curves
+*  in a window on your computer and to save the drawings to a file.
+*
+*  Todo
+*  ----
+*    -  Add support for gradient fill, etc.
+*    -  Fix setCanvasSize() so that it can only be called once.
+*    -  On some systems, drawing a line (or other shape) that extends way
+*       beyond canvas (e.g., to infinity) dimensions does not get drawn.
+*
+*  Remarks
+*  -------
+*    -  don't use AffineTransform for rescaling since it inverts
+*       images and strings
+*
+******************************************************************************/
 
 /**
  *  The {@code StdDraw} class provides a basic capability for
@@ -622,6 +615,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 	// default font
 	private static final Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 16);
+	private static final double EPSILON = 0.5;
 
 	// current font
 	private static Font font;
@@ -1728,17 +1722,13 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		}
 
-		if(str.startsWith("Save Graph")) {////check////
+		if(str.startsWith("Save Graph")) {
 
 			String filename = JOptionPane.showInputDialog(null, "Input a file name:");
 			if (filename != null) {
 				graph.save(filename);
 			}
 
-			//			FileDialog chooser = new FileDialog(StdDraw.frame, "Saving graph file", FileDialog.SAVE);
-			//			chooser.setVisible(true);
-			//			String filename = chooser.getFile();
-			//			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
 		}
 		if (str.equals("Is_Connected")){
 			boolean ans=graph.isConnected();
@@ -1813,36 +1803,50 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		}
 		if(str.equals("TSP")) {
 
+			if(keys.size() <= 1) {
+				JOptionPane.showMessageDialog(null, "Please pick at least 2 nodes on the frame\n and then press TSP again! ","Error", JOptionPane.ERROR_MESSAGE);
+				gui.init(graph.getG());
+				gui.update();
+			}
+			else {
+
+				JOptionPane.showMessageDialog(null,"The node you have selected:\n "+keys,"TSP", JOptionPane.INFORMATION_MESSAGE);
+				List<Integer> targets = new ArrayList<Integer>();
+				targets.addAll(keys);
+				List<node_data> ans = graph.TSP(targets);
+
+				if(ans != null)
+				{
+					String ans_keys="";
+					for (node_data n : ans) {
+						if(!n.equals(ans.get(ans.size()-1)))
+							ans_keys+=n.getKey()+"->";
+						else
+							ans_keys+=n.getKey();
+					}
+					JOptionPane.showMessageDialog(null,"The shortest path is:\n "+ans_keys,"TSP result", JOptionPane.INFORMATION_MESSAGE);
+				}
+				else 
+				{
+					JOptionPane.showMessageDialog(null,"Error: There is no path between all those points :", "TSP result", JOptionPane.INFORMATION_MESSAGE);	
+				}
+				gui.init(graph.getG());
+				gui.update();
+				StdDraw.show();
+				keys.clear();
+			}
 		}
+
 	}
 
-	private List<Integer> targetsForTSP=new ArrayList<Integer>();
-
-	private node_data findNode(double x,double y) {
+	private int isANode(double x,double y) {
 		for(Iterator<node_data> verIter=graph.getG().getV().iterator();verIter.hasNext();) {
 			node_data nd=verIter.next();
-			if(Math.abs(x-nd.getLocation().x())<=0.2&&Math.abs(y-nd.getLocation().y())<=0.2)
-				return nd;
+			if(Math.abs(x-nd.getLocation().x())<= StdDraw.EPSILON
+					&&Math.abs(y-nd.getLocation().y())<= StdDraw.EPSILON)
+				return nd.getKey();
 		}
-		return null;
-	}
-	private void paintTSP(List<Integer> targets) 
-	{
-		List <Integer> t=new ArrayList();
-		for(int i=0;i<targets.size();i++) {//copy for targets because TSP delete the targets. 
-			t.add(targets.get(i));
-		}
-		List<node_data> ver=graph.TSP(t);
-
-		for(int i=0;i<ver.size()-1;i++)
-		{
-			StdDraw.setPenColor(Color.PINK);
-			StdDraw.setPenRadius(0.005);
-			StdDraw.line(ver.get(i).getLocation().x(),ver.get(i).getLocation().y(),ver.get(i+1).getLocation().x(),ver.get(i+1).getLocation().y());
-			StdDraw.setPenColor(Color.GREEN);
-			StdDraw.setPenRadius(0.015);
-			StdDraw.point(ver.get(i+1).getLocation().x(),ver.get(i+1).getLocation().y());
-		}
+		return -1;
 	}
 
 	/***************************************************************************
@@ -1895,223 +1899,204 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		}
 	}
 
-
+	LinkedHashSet<Integer> keys = new LinkedHashSet<Integer>();
 	/**
 	 * This method cannot be called directly.
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// this body is intentionally left empty
-	}
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// this body is intentionally left empty
-	}
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// this body is intentionally left empty
-	}
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-		synchronized (mouseLock) {
-			mouseX = StdDraw.userX(e.getX());
-			mouseY = StdDraw.userY(e.getY());
-			isMousePressed = true;
-			//			String key;
-			//			key= JOptionPane.showInputDialog(null, "Enter the new node key:");
-			//			int ID=graph.getG().nodeSize()+1;
-			//			try {
-			//				 ID=Integer.parseInt(key);
-			//			} catch (NumberFormatException ex) {
-			//				System.out.println(ex.getMessage());
-			//				key= JOptionPane.showInputDialog(null, "Enter the new node key:");
-			//			}
-			//			
-			//			Point3D p = new Point3D(mouseX,mouseY);
-			//			node_data n=new Node(ID,p);
-			//			graph.getG().addNode(n);
-			//			gui.init(graph.getG());
-			//			System.out.println(n);
-			//			gui.drawGraph();
-			System.out.println(mouseX);
-			System.out.println(mouseY);
-			if(this.findNode(mouseX,mouseY)!=null) {
-				System.out.println("mousePressed");
-				this.targetsForTSP.add(this.findNode(mouseX,mouseY).getKey());
-				StdDraw.setPenColor(Color.GREEN);
-				StdDraw.setPenRadius(0.015);
-				StdDraw.point(this.findNode(mouseX,mouseY).getLocation().x(), this.findNode(mouseX,mouseY).getLocation().y());
-			}
-			if(this.targetsForTSP.size()>1) {
-				gui.drawGraph();
-				this.paintTSP(this.targetsForTSP);
-			}
+		int key = isANode((StdDraw.userX(e.getX())),StdDraw.userY(e.getY()));
+		if(key != -1) {
+			keys.add(key);
+			StdDraw.setPenColor(Color.GREEN);
+			StdDraw.setPenRadius(0.015);
+			StdDraw.point(graph.getG().getNode(key).getLocation().x(), graph.getG().getNode(key).getLocation().y());
+			gui.init(graph.getG());
 		}
 	}
 
 
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		synchronized (mouseLock) {
-			isMousePressed = false;
+// this body is intentionally left empty
+
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mouseEntered(MouseEvent e) {
+	// this body is intentionally left empty
+}
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mouseExited(MouseEvent e) {
+	// this body is intentionally left empty
+}
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mousePressed(MouseEvent e) {
+	synchronized (mouseLock) {
+		mouseX = StdDraw.userX(e.getX());
+		mouseY = StdDraw.userY(e.getY());
+	}
+}
+
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mouseReleased(MouseEvent e) {
+	synchronized (mouseLock) {
+		isMousePressed = false;
+	}
+}
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mouseDragged(MouseEvent e)  {
+	synchronized (mouseLock) {
+		mouseX = StdDraw.userX(e.getX());
+		mouseY = StdDraw.userY(e.getY());
+	}
+}
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void mouseMoved(MouseEvent e) {
+	synchronized (mouseLock) {
+		mouseX = StdDraw.userX(e.getX());
+		mouseY = StdDraw.userY(e.getY());
+	}
+}
+
+
+/***************************************************************************
+ *  Keyboard interactions.
+ ***************************************************************************/
+
+/**
+ * Returns true if the user has typed a key (that has not yet been processed).
+ *
+ * @return {@code true} if the user has typed a key (that has not yet been processed
+ *         by {@link #nextKeyTyped()}; {@code false} otherwise
+ */
+public static boolean hasNextKeyTyped() {
+	synchronized (keyLock) {
+		return !keysTyped.isEmpty();
+	}
+}
+
+/**
+ * Returns the next key that was typed by the user (that your program has not already processed).
+ * This method should be preceded by a call to {@link #hasNextKeyTyped()} to ensure
+ * that there is a next key to process.
+ * This method returns a Unicode character corresponding to the key
+ * typed (such as {@code 'a'} or {@code 'A'}).
+ * It cannot identify action keys (such as F1 and arrow keys)
+ * or modifier keys (such as control).
+ *
+ * @return the next key typed by the user (that your program has not already processed).
+ * @throws NoSuchElementException if there is no remaining key
+ */
+public static char nextKeyTyped() {
+	synchronized (keyLock) {
+		if (keysTyped.isEmpty()) {
+			throw new NoSuchElementException("your program has already processed all keystrokes");
 		}
+		return keysTyped.remove(keysTyped.size() - 1);
+		// return keysTyped.removeLast();
 	}
+}
 
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mouseDragged(MouseEvent e)  {
-		synchronized (mouseLock) {
-			mouseX = StdDraw.userX(e.getX());
-			mouseY = StdDraw.userY(e.getY());
-		}
+/**
+ * Returns true if the given key is being pressed.
+ * <p>
+ * This method takes the keycode (corresponding to a physical key)
+ *  as an argument. It can handle action keys
+ * (such as F1 and arrow keys) and modifier keys (such as shift and control).
+ * See {@link KeyEvent} for a description of key codes.
+ *
+ * @param  keycode the key to check if it is being pressed
+ * @return {@code true} if {@code keycode} is currently being pressed;
+ *         {@code false} otherwise
+ */
+public static boolean isKeyPressed(int keycode) {
+	synchronized (keyLock) {
+		return keysDown.contains(keycode);
 	}
+}
 
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		synchronized (mouseLock) {
-			mouseX = StdDraw.userX(e.getX());
-			mouseY = StdDraw.userY(e.getY());
-		}
+
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void keyTyped(KeyEvent e) {
+	synchronized (keyLock) {
+		keysTyped.addFirst(e.getKeyChar());
 	}
+}
 
-
-	/***************************************************************************
-	 *  Keyboard interactions.
-	 ***************************************************************************/
-
-	/**
-	 * Returns true if the user has typed a key (that has not yet been processed).
-	 *
-	 * @return {@code true} if the user has typed a key (that has not yet been processed
-	 *         by {@link #nextKeyTyped()}; {@code false} otherwise
-	 */
-	public static boolean hasNextKeyTyped() {
-		synchronized (keyLock) {
-			return !keysTyped.isEmpty();
-		}
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void keyPressed(KeyEvent e) {
+	synchronized (keyLock) {
+		keysDown.add(e.getKeyCode());
 	}
+}
 
-	/**
-	 * Returns the next key that was typed by the user (that your program has not already processed).
-	 * This method should be preceded by a call to {@link #hasNextKeyTyped()} to ensure
-	 * that there is a next key to process.
-	 * This method returns a Unicode character corresponding to the key
-	 * typed (such as {@code 'a'} or {@code 'A'}).
-	 * It cannot identify action keys (such as F1 and arrow keys)
-	 * or modifier keys (such as control).
-	 *
-	 * @return the next key typed by the user (that your program has not already processed).
-	 * @throws NoSuchElementException if there is no remaining key
-	 */
-	public static char nextKeyTyped() {
-		synchronized (keyLock) {
-			if (keysTyped.isEmpty()) {
-				throw new NoSuchElementException("your program has already processed all keystrokes");
-			}
-			return keysTyped.remove(keysTyped.size() - 1);
-			// return keysTyped.removeLast();
-		}
+/**
+ * This method cannot be called directly.
+ */
+@Override
+public void keyReleased(KeyEvent e) {
+	synchronized (keyLock) {
+		keysDown.remove(e.getKeyCode());
 	}
-
-	/**
-	 * Returns true if the given key is being pressed.
-	 * <p>
-	 * This method takes the keycode (corresponding to a physical key)
-	 *  as an argument. It can handle action keys
-	 * (such as F1 and arrow keys) and modifier keys (such as shift and control).
-	 * See {@link KeyEvent} for a description of key codes.
-	 *
-	 * @param  keycode the key to check if it is being pressed
-	 * @return {@code true} if {@code keycode} is currently being pressed;
-	 *         {@code false} otherwise
-	 */
-	public static boolean isKeyPressed(int keycode) {
-		synchronized (keyLock) {
-			return keysDown.contains(keycode);
-		}
-	}
-
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void keyTyped(KeyEvent e) {
-		synchronized (keyLock) {
-			keysTyped.addFirst(e.getKeyChar());
-		}
-	}
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void keyPressed(KeyEvent e) {
-		synchronized (keyLock) {
-			keysDown.add(e.getKeyCode());
-		}
-	}
-
-	/**
-	 * This method cannot be called directly.
-	 */
-	@Override
-	public void keyReleased(KeyEvent e) {
-		synchronized (keyLock) {
-			keysDown.remove(e.getKeyCode());
-		}
-	}
+}
 
 
 
 
-	/**
-	 * Test client.
-	 *
-	 * @param args the command-line arguments
-	 */
-	public static void main(String[] args) {
-		StdDraw.square(0.2, 0.8, 0.1);
-		StdDraw.filledSquare(0.8, 0.8, 0.2);
-		StdDraw.circle(0.8, 0.2, 0.2);
+/**
+ * Test client.
+ *
+ * @param args the command-line arguments
+ */
+public static void main(String[] args) {
+	StdDraw.square(0.2, 0.8, 0.1);
+	StdDraw.filledSquare(0.8, 0.8, 0.2);
+	StdDraw.circle(0.8, 0.2, 0.2);
 
-		StdDraw.setPenColor(StdDraw.BOOK_RED);
-		StdDraw.setPenRadius(0.02);
-		StdDraw.arc(0.8, 0.2, 0.1, 200, 45);
+	StdDraw.setPenColor(StdDraw.BOOK_RED);
+	StdDraw.setPenRadius(0.02);
+	StdDraw.arc(0.8, 0.2, 0.1, 200, 45);
 
-		// draw a blue diamond
-		StdDraw.setPenRadius();
-		StdDraw.setPenColor(StdDraw.BOOK_BLUE);
-		double[] x = { 0.1, 0.2, 0.3, 0.2 };
-		double[] y = { 0.2, 0.3, 0.2, 0.1 };
-		StdDraw.filledPolygon(x, y);
+	// draw a blue diamond
+	StdDraw.setPenRadius();
+	StdDraw.setPenColor(StdDraw.BOOK_BLUE);
+	double[] x = { 0.1, 0.2, 0.3, 0.2 };
+	double[] y = { 0.2, 0.3, 0.2, 0.1 };
+	StdDraw.filledPolygon(x, y);
 
-		// text
-		StdDraw.setPenColor(StdDraw.BLACK);
-		StdDraw.text(0.2, 0.5, "black text");
-		StdDraw.setPenColor(StdDraw.WHITE);
-		StdDraw.text(0.8, 0.8, "white text");
-	}
+	// text
+	StdDraw.setPenColor(StdDraw.BLACK);
+	StdDraw.text(0.2, 0.5, "black text");
+	StdDraw.setPenColor(StdDraw.WHITE);
+	StdDraw.text(0.8, 0.8, "white text");
+}
 
 }
 
