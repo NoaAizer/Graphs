@@ -25,6 +25,20 @@ import dataStructure.*;
 public class Graph_Algo implements graph_algorithms{
 	private graph g;
 
+ 
+	/**
+	 * Default constructor.
+	 */
+	public Graph_Algo() {
+		// TODO Auto-generated constructor stub
+	}
+	/**
+	 * Constructor
+	 * @param _graph represents the given graph
+	 */
+	public Graph_Algo(graph _graph) {
+		this.g=_graph;
+	}
 	/**
 	 * Init this set of algorithms on the parameter - graph.
 	 * @param g is the given graph
