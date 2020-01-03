@@ -25,7 +25,7 @@ import dataStructure.*;
 public class Graph_Algo implements graph_algorithms{
 	private graph g;
 
- 
+
 	/**
 	 * Default constructor.
 	 */
@@ -197,47 +197,54 @@ public class Graph_Algo implements graph_algorithms{
 	@Override
 	public List<node_data> TSP(List<Integer> targets) 
 	{
-//NOTE: There is another way (was left as a remark) which give the shortest path between the nodes -Take each one of the nodes
-// to be a source node, and pick the node with the shortest path. This way take a lot of time so we decided
-//to pick the source node randomly.
-	if(!haveAPath(targets))return null;// Checks if there a path between these nodes.
+		//NOTE: There is another way (was left as a remark) which give the shortest path between the nodes -Take each one of the nodes
+		// to be a source node, and pick the node with the shortest path. This way take a lot of time so we decided
+		//to pick the source node randomly.
+		if(!haveAPath(targets))return null;// Checks if there a path between these nodes.
+		System.out.println("check");
 		List<node_data> path=new ArrayList<node_data>();
-//						double tempMin=Double.POSITIVE_INFINITY;
-//						int currShortestSrcIn=0;
-//						for(int j=0;j<targets.size();j++) {
-//							double min=shortestPathDistToAll(j, targets);
-//							if(min<tempMin) {
-//								currShortestSrcIn=j;
-//								tempMin=min;
-//							}
-//						}
-//						int srcIndex=currShortestSrcIn;
-		int srcIndex=(int)(Math.random()*targets.size());// Randomly takes one of the nodes in the list as a src node
+		//						double tempMin=Double.POSITIVE_INFINITY;
+		//						int currShortestSrcIn=0;
+		//						for(int j=0;j<targets.size();j++) {
+		//							double min=shortestPathDistToAll(j, targets);
+		//							if(min<tempMin) {
+		//								currShortestSrcIn=j;
+		//								tempMin=min;
+		//							}
+		//						}
+		//						int srcIndex=currShortestSrcIn;
+		try {
+			int srcIndex=(int)(Math.random()*targets.size());// Randomly takes one of the nodes in the list as a src node
 
-		int src= targets.get(srcIndex);
-		int destIndex=0,dest=0;
-		targets.remove(srcIndex);
-		path.add(g.getNode(src));
-		while(!targets.isEmpty()) {
-			double minPath=Double.POSITIVE_INFINITY;
-			//Finds the shortest path between the src and one of the nodes
-			for(int i=0;i<targets.size();i++) {
-				double dist=shortestPathDist(src, targets.get(i));
-				if(dist<minPath) {
-					minPath=dist;
-					dest=targets.get(i);
-					destIndex=i;
+			int src= targets.get(srcIndex);
+			int destIndex=0,dest=0;
+			targets.remove(srcIndex);
+			path.add(g.getNode(src));
+			while(!targets.isEmpty()) {
+				double minPath=Double.POSITIVE_INFINITY;
+				//Finds the shortest path between the src and one of the nodes
+				for(int i=0;i<targets.size();i++) {
+					double dist=shortestPathDist(src, targets.get(i));
+					if(dist<minPath) {
+						minPath=dist;
+						dest=targets.get(i);
+						destIndex=i;
+					}
 				}
+				List<node_data> tempPath=shortestPath(src, dest);
+				if(tempPath==null) return null;
+				boolean flag_first=true;
+				for (node_data n : tempPath) {
+					if(flag_first) flag_first=false;
+					else path.add(n);
+				}
+
+				targets.remove(destIndex);
+				src=dest;
 			}
-			List<node_data> tempPath=shortestPath(src, dest);
-			boolean flag_first=true;
-			for (node_data n : tempPath) {
-				if(flag_first) flag_first=false;
-				else path.add(n);
-			}
-			targets.remove(destIndex);
-			src=dest;
 		}
+		catch(Exception e) {};
+
 		return path;
 	}
 	/** 
@@ -247,6 +254,7 @@ public class Graph_Algo implements graph_algorithms{
 	@Override
 	public graph copy() {
 		DGraph g_copy= new DGraph();
+		try {
 		for (node_data n : g.getV()) {
 			g_copy.addNode(n);
 		}
@@ -256,6 +264,8 @@ public class Graph_Algo implements graph_algorithms{
 			for (edge_data e : g.getE(n.getKey())) 
 				g_copy.connect(e.getSrc(),e.getDest(),e.getWeight());
 		}
+		}
+		catch(Exception e) {};
 		return g_copy;
 	}
 	/**
@@ -359,48 +369,48 @@ public class Graph_Algo implements graph_algorithms{
 		q.remove(temp);
 		return minNode;
 	}
-// NOTE: Related to the remark in TSP method.
+	// NOTE: Related to the remark in TSP method.
 	/**
 	 * Calculates the shortest path from one of the nodes in the target list to the rest.
 	 * @param srcIndex the index of this node.
 	 * @param targets 
 	 * @return the shortest path distance from the requested node
 	 */
-//	private double shortestPathDistToAll(int srcIndex,List<Integer> targets) {
-//		List<node_data> path=new ArrayList<node_data>();
-//		List<Integer> targetsTemp=new ArrayList<Integer>();
-//		double min= Double.POSITIVE_INFINITY;
-//		for (Integer tar : targets) {
-//			targetsTemp.add(tar);
-//		}
-//		try {
-//			int src= targetsTemp.get(srcIndex);
-//			int destIndex=0,dest=0;
-//			targetsTemp.remove(srcIndex);
-//			path.add(g.getNode(src));
-//			while(!targetsTemp.isEmpty()) {
-//				double minPath=Double.POSITIVE_INFINITY;
-//				//Finds the shortest path between the src and one of the nodes
-//				for(int i=0;i<targetsTemp.size();i++) {
-//					if(targetsTemp.get(i)==null)
-//						throw new RuntimeException("ERR: the requseted node is not exist in the graph.");
-//					else
-//					{double dist=shortestPathDist(src, targetsTemp.get(i));
-//					if(dist<minPath) {
-//						minPath=dist;
-//						dest=targetsTemp.get(i);
-//						destIndex=i;
-//					}
-//					}
-//					min+=minPath;
-//					targetsTemp.remove(destIndex);
-//					src=dest;
-//				}
-//			}
-//		}
-//		catch(Exception e) {System.out.println(e.getMessage());}
-//		return min; 
-//	}
+	//	private double shortestPathDistToAll(int srcIndex,List<Integer> targets) {
+	//		List<node_data> path=new ArrayList<node_data>();
+	//		List<Integer> targetsTemp=new ArrayList<Integer>();
+	//		double min= Double.POSITIVE_INFINITY;
+	//		for (Integer tar : targets) {
+	//			targetsTemp.add(tar);
+	//		}
+	//		try {
+	//			int src= targetsTemp.get(srcIndex);
+	//			int destIndex=0,dest=0;
+	//			targetsTemp.remove(srcIndex);
+	//			path.add(g.getNode(src));
+	//			while(!targetsTemp.isEmpty()) {
+	//				double minPath=Double.POSITIVE_INFINITY;
+	//				//Finds the shortest path between the src and one of the nodes
+	//				for(int i=0;i<targetsTemp.size();i++) {
+	//					if(targetsTemp.get(i)==null)
+	//						throw new RuntimeException("ERR: the requseted node is not exist in the graph.");
+	//					else
+	//					{double dist=shortestPathDist(src, targetsTemp.get(i));
+	//					if(dist<minPath) {
+	//						minPath=dist;
+	//						dest=targetsTemp.get(i);
+	//						destIndex=i;
+	//					}
+	//					}
+	//					min+=minPath;
+	//					targetsTemp.remove(destIndex);
+	//					src=dest;
+	//				}
+	//			}
+	//		}
+	//		catch(Exception e) {System.out.println(e.getMessage());}
+	//		return min; 
+	//	}
 	/**
 	 * Checks if there a path between some of the nodes in the graph
 	 * @param targets represents a list of the requested nodes in the graph

@@ -107,7 +107,7 @@ public class Graph_GUI {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes) {
 			if(n.getLocation().x()<min) min=n.getLocation().x();
-			else if(n.getLocation().x()>max) max=n.getLocation().x();
+			if(n.getLocation().x()>max) max=n.getLocation().x();
 		}
 		return new Range (min,max);
 	}
@@ -120,7 +120,7 @@ public class Graph_GUI {
 		double min= Double.POSITIVE_INFINITY , max=Double.NEGATIVE_INFINITY;
 		for (node_data n: nodes)  {
 			if(n.getLocation().y()<min) min=n.getLocation().y();
-			else if(n.getLocation().y()>max) max=n.getLocation().y();
+			if(n.getLocation().y()>max) max=n.getLocation().y();
 		}
 		return new Range (min,max);
 	}

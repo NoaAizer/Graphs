@@ -68,9 +68,7 @@ public class DGraph implements graph, Serializable{
 			nodes.put(n.getKey(),n);
 			mc++;
 		}
-		catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
+		catch(Exception e) {}
 	}
 	/**
 	 * Connect an edge with weight w between node src to node dest.
@@ -85,8 +83,7 @@ public class DGraph implements graph, Serializable{
 				throw new RuntimeException("ERR: The weight should be larger than 0");
 			if(src==dest)
 				throw new RuntimeException("ERR: The nodes should be different");
-			if(!nodes.containsKey(src)||!nodes.containsKey(dest)) 
-				throw new RuntimeException("ERR: One of the node is not exist");
+			if(nodes.containsKey(src)&&nodes.containsKey(dest)) {
 			Edge e = new Edge(src, dest, w,"",0);	
 			if(!edges.containsKey(src)) {//if the src node is already exist
 				HashMap<Integer,edge_data> newEdge= new HashMap<Integer,edge_data>();//empty hashmap
@@ -95,6 +92,7 @@ public class DGraph implements graph, Serializable{
 			edges.get(src).put(dest,e);
 			mc++;
 			edgesCounter++;
+		}
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
