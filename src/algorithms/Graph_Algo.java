@@ -201,7 +201,6 @@ public class Graph_Algo implements graph_algorithms{
 		// to be a source node, and pick the node with the shortest path. This way take a lot of time so we decided
 		//to pick the source node randomly.
 		if(!haveAPath(targets))return null;// Checks if there a path between these nodes.
-		System.out.println("check");
 		List<node_data> path=new ArrayList<node_data>();
 		//						double tempMin=Double.POSITIVE_INFINITY;
 		//						int currShortestSrcIn=0;
