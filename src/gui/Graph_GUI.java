@@ -10,18 +10,51 @@ import java.util.Collection;
 import java.util.Iterator;
 
 
-public class Graph_GUI {
+public class Graph_GUI implements Runnable{
 	graph g;
+	int mc;
 
 	/**
 	 * Add a graph to draw
 	 * @param _g represents the graph for the drawing.
 	 */
+	public Graph_GUI() {
+		graph gr= new DGraph();
+		this.init(gr);
+
+	}
+	public Graph_GUI(graph _g) {
+		this.init(_g);
+	}
 	public void init (graph _g) {
 		this.g=_g;
+		this.mc=_g.getMC();
+		Thread t1=new Thread(this);
+		t1.start();
 		StdDraw.initGraph(g);
+
+
 	}
-	
+	@Override
+	public void run() {
+		while(true) {
+			synchronized(this) {
+				if(this.mc!=this.g.getMC()) {
+					this.drawGraph();
+					this.mc=this.g.getMC();
+				}
+				else {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+	}
 	/**
 	 * Initialize the size of the frame according to the x,y ranges.
 	 */
@@ -50,7 +83,7 @@ public class Graph_GUI {
 			}
 		}
 	}
-	
+
 	/**
 	 * Open a new frame with the updated graph.(and close the previous frame). 
 	 */
@@ -124,8 +157,8 @@ public class Graph_GUI {
 		}
 		return new Range (min,max);
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 
 		graph g= new DGraph();
@@ -170,10 +203,11 @@ public class Graph_GUI {
 		g.connect(n5.getKey(), n7.getKey(), 5);
 		g.connect(n6.getKey(), n7.getKey(), 3);
 		g.connect(n7.getKey(), n4.getKey(), 10);
-		Graph_GUI app = new Graph_GUI();
-		app.init(g);
+		Graph_GUI app = new Graph_GUI(g);
 		app.drawGraph();
+
 	}
+
 
 
 }

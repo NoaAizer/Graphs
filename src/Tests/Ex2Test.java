@@ -1,3 +1,4 @@
+
 package Tests;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,6 +11,8 @@ import algorithms.*;
 import dataStructure.*;
 import utils.*;
 import gui.*;
+
+
 
 /**
  * EX2 Structure test:
@@ -56,8 +59,7 @@ class Ex2Test {
 		return ans;
 	}
 	boolean drawGraph(graph g) { 
-		Graph_GUI gg = new Graph_GUI();
-		gg.init(g);
+		Graph_GUI gg = new Graph_GUI(g);
 		gg.drawGraph();
 		return true;
 

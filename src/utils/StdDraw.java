@@ -1336,7 +1336,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	/*
     private static BufferedImage getImage(String filename) {
         if (filename == null) throw new IllegalArgumentException();
-
         // from a file or URL
         try {
             URL url = new URL(filename);
@@ -1346,7 +1345,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
         catch (IOException e) {
             // ignore
         }
-
         // in case file is inside a .jar (classpath relative to StdDraw)
         try {
             URL url = StdDraw.class.getResource(filename);
@@ -1356,7 +1354,6 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
         catch (IOException e) {
             // ignore
         }
-
         // in case file is inside a .jar (classpath relative to root of jar)
         try {
             URL url = StdDraw.class.getResource("/" + filename);

@@ -255,4 +255,3 @@ class DGraphTest {
 		current_mc+=5;
 	}
 }
-
